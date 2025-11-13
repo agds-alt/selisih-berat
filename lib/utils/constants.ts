@@ -53,11 +53,11 @@ export function calculateEarnings(selisih: number, totalEntries: number): number
   const accuracyBonus = Math.abs(selisih) < 0.5 ? 1.5 : 1.0
 
   // Level-based rate
-  let rate = baseRate
-  if (level.name === 'BRONZE') rate = 700
-  else if (level.name === 'SILVER') rate = 900
-  else if (level.name === 'GOLD') rate = 1200
-  else if (level.name === 'DIAMOND') rate = 1500
+  let rate: number = baseRate
+  if (level.name === 'Bronze') rate = 700
+  else if (level.name === 'Silver') rate = 900
+  else if (level.name === 'Gold') rate = 1200
+  else if (level.name === 'Diamond') rate = 1500
 
   return Math.round(rate * accuracyBonus)
 }

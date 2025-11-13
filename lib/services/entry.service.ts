@@ -50,7 +50,7 @@ export class EntryService {
   }
 
   async getAll(
-    filter?: { search?: string; status?: string },
+    filter?: { search?: string; status?: string; created_by?: string },
     role?: string,
     userId?: string,
     page: number = 1,
