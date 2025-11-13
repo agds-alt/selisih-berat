@@ -50,7 +50,7 @@ export async function initBarcodeScanner(
   return new Promise((resolve, reject) => {
     const config = getDefaultBarcodeConfig(targetElement)
 
-    Quagga.init(config, (err) => {
+    Quagga.init(config as any, (err) => {
       if (err) {
         console.error('Barcode scanner init error:', err)
         if (onError) onError(err)
