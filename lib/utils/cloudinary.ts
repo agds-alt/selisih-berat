@@ -173,7 +173,8 @@ export function extractPublicId(url: string): string | null {
     const publicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'))
 
     // Include folder path
-    const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER || 'selisih_berat'
+    // Default to 'weight-entries' to match production configuration
+    const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER || 'weight-entries'
     return `${folder}/${publicId}`
   } catch (error) {
     console.error('Error extracting public ID:', error)

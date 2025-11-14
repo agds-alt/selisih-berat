@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator</title>
+</head>
+<body>
+    <h1>PWA Icon Generator</h1>
+    <p>This will generate PNG icons from the SVG icon.</p>
+    <button onclick="generateIcons()">Generate Icons</button>
+    <div id="output"></div>
+
+    <script>
+        function generateIcons() {
+            const sizes = [192, 512];
+            const svgContent = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#dc2626"/>
+  <text x="256" y="320" font-family="Arial" font-size="200" font-weight="bold" fill="white" text-anchor="middle">W</text>
+</svg>`;
+
+            sizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // Draw red background
+                ctx.fillStyle = '#dc2626';
+                ctx.fillRect(0, 0, size, size);
+
+                // Draw white "W" text
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.39}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('W', size / 2, size / 2);
+
+                // Convert to PNG and download
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `icon-${size}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            });
+
+            document.getElementById('output').innerHTML = '<p style="color: green;">Icons generated! Check your downloads folder.</p>';
+        }
+    </script>
+</body>
+</html>
