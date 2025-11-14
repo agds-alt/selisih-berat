@@ -22,6 +22,7 @@ export default function EntryPage() {
   const [location, setLocation] = useState<LocationInfo | null>(null)
   const [ratePerEntry, setRatePerEntry] = useState(500)
   const [dailyBonus, setDailyBonus] = useState(50000)
+  const [userName, setUserName] = useState('')
 
   // Get pre-filled no_resi from URL params (from scanner)
   const prefilledNoResi = searchParams.get('no_resi') || ''
@@ -48,13 +49,22 @@ export default function EntryPage() {
       return
     }
 
+    // Get user data and set nama field
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      try {
+        const user = JSON.parse(userData)
+        const displayName = user.full_name || user.username
+        setUserName(displayName)
+        setFormData((prev) => ({ ...prev, nama: displayName }))
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+      }
+    }
+
     // If no_resi was pre-filled from scanner, show success toast
     if (prefilledNoResi) {
       showToast('Barcode berhasil di-scan! ✅', 'success')
-      // Focus on nama field for quick entry
-      setTimeout(() => {
-        document.getElementById('nama')?.focus()
-      }, 500)
     }
 
     // Fetch earnings settings
@@ -134,9 +144,9 @@ export default function EntryPage() {
       if (result.success) {
         showToast('Entry berhasil dibuat!', 'success')
 
-        // Reset form
+        // Reset form but keep nama (user name)
         setFormData({
-          nama: '',
+          nama: userName,
           no_resi: '',
           berat_resi: '',
           berat_aktual: '',
@@ -215,15 +225,16 @@ export default function EntryPage() {
               )}
             </div>
 
-            {/* Nama */}
+            {/* Nama Peng-Entry */}
             <Input
               id="nama"
-              label="Nama"
+              label="Nama Peng-Entry"
               type="text"
               required
               value={formData.nama}
-              onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-              placeholder="Nama penerima"
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+              placeholder="Nama peng-entry"
             />
 
             {/* Berat */}
