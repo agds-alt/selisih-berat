@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { addWatermarkToImage } from '@/lib/utils/watermark'
+import { compressImage, validateImageFile } from '@/lib/utils/image-optimization'
 import type { LocationInfo } from '@/lib/types/entry'
 import Image from 'next/image'
 
@@ -17,6 +18,10 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
   const [preview1, setPreview1] = useState<string | null>(null)
   const [preview2, setPreview2] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [compressionInfo1, setCompressionInfo1] = useState<string | null>(null)
+  const [compressionInfo2, setCompressionInfo2] = useState<string | null>(null)
+  const [uploadProgress1, setUploadProgress1] = useState<string>('')
+  const [uploadProgress2, setUploadProgress2] = useState<string>('')
 
   const input1Ref = useRef<HTMLInputElement>(null)
   const input2Ref = useRef<HTMLInputElement>(null)
@@ -57,23 +62,53 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
 
     const setUploading = photoNumber === 1 ? setUploading1 : setUploading2
     const setPreview = photoNumber === 1 ? setPreview1 : setPreview2
+    const setProgress = photoNumber === 1 ? setUploadProgress1 : setUploadProgress2
+    const setCompressionInfo = photoNumber === 1 ? setCompressionInfo1 : setCompressionInfo2
 
     try {
       setError(null)
       setUploading(true)
+      setProgress('Memulai...')
 
-      // Add watermark to image
-      const watermarkedBlob = await addWatermarkToImage(file, {
+      // Step 1: Validate file (5%)
+      setProgress('Validasi file... (5%)')
+      const validation = validateImageFile(file)
+      if (!validation.valid) {
+        setError(validation.error || 'File tidak valid')
+        return
+      }
+
+      // Step 2: Compress image (15%)
+      setProgress('Kompresi gambar... (15%)')
+      const originalSize = (file.size / 1024 / 1024).toFixed(2)
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      })
+      const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(2)
+      const reduction = Math.round(((file.size - compressedFile.size) / file.size) * 100)
+
+      setCompressionInfo(`${originalSize}MB → ${compressedSize}MB (${reduction}% lebih kecil)`)
+
+      // Step 3: Add watermark (40%)
+      setProgress('Menambahkan watermark... (40%)')
+      const watermarkedBlob = await addWatermarkToImage(compressedFile, {
         location,
         timestamp: new Date(),
       })
 
-      // Create preview
+      // Step 4: Create preview (60%)
+      setProgress('Membuat preview... (60%)')
       const previewUrl = URL.createObjectURL(watermarkedBlob)
       setPreview(previewUrl)
 
-      // Upload to Cloudinary
+      // Step 5: Upload to Cloudinary (80%)
+      setProgress('Upload ke cloud... (80%)')
       const cloudinaryUrl = await uploadToCloudinary(watermarkedBlob)
+
+      // Step 6: Finalize (100%)
+      setProgress('Selesai! (100%)')
 
       // Call parent callback
       if (photoNumber === 1) {
@@ -83,10 +118,14 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
       }
 
       setError(null)
+
+      // Clear progress after 2 seconds
+      setTimeout(() => setProgress(''), 2000)
     } catch (err: any) {
       console.error('Upload error:', err)
       setError(`Gagal upload foto ${photoNumber}: ${err.message}`)
       setPreview(null)
+      setCompressionInfo(null)
     } finally {
       setUploading(false)
     }
@@ -125,7 +164,10 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
             {uploading1 ? (
               <div className="flex flex-col items-center space-y-2">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                <span>Uploading...</span>
+                <span className="font-semibold">{uploadProgress1}</span>
+                {compressionInfo1 && (
+                  <span className="text-xs text-green-600">✅ {compressionInfo1}</span>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center space-y-2">
@@ -138,7 +180,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
             )}
           </button>
         ) : (
-          <div className="photo-preview">
+          <div className="photo-preview relative">
             <Image
               src={preview1}
               alt="Preview foto 1"
@@ -146,10 +188,16 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               height={300}
               className="rounded-lg"
             />
+            {compressionInfo1 && (
+              <div className="absolute bottom-2 left-2 right-2 bg-green-600 bg-opacity-90 text-white text-xs p-2 rounded">
+                ✅ Terkompresi: {compressionInfo1}
+              </div>
+            )}
             <button
               type="button"
               onClick={() => {
                 setPreview1(null)
+                setCompressionInfo1(null)
                 if (input1Ref.current) input1Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
@@ -185,7 +233,10 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
             {uploading2 ? (
               <div className="flex flex-col items-center space-y-2">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                <span>Uploading...</span>
+                <span className="font-semibold">{uploadProgress2}</span>
+                {compressionInfo2 && (
+                  <span className="text-xs text-green-600">✅ {compressionInfo2}</span>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center space-y-2">
@@ -198,7 +249,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
             )}
           </button>
         ) : (
-          <div className="photo-preview">
+          <div className="photo-preview relative">
             <Image
               src={preview2}
               alt="Preview foto 2"
@@ -206,10 +257,16 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               height={300}
               className="rounded-lg"
             />
+            {compressionInfo2 && (
+              <div className="absolute bottom-2 left-2 right-2 bg-green-600 bg-opacity-90 text-white text-xs p-2 rounded">
+                ✅ Terkompresi: {compressionInfo2}
+              </div>
+            )}
             <button
               type="button"
               onClick={() => {
                 setPreview2(null)
+                setCompressionInfo2(null)
                 if (input2Ref.current) input2Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
@@ -221,9 +278,10 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
       </div>
 
       <div className="text-xs text-gray-500 space-y-1">
-        <p>• Foto akan otomatis ditambahkan watermark GPS dan timestamp</p>
-        <p>• Gunakan foto yang jelas dan fokus</p>
-        <p>• Upload langsung ke Cloudinary (hemat bandwidth)</p>
+        <p>• 🗜️ Foto otomatis dikompresi 80-90% (4MB → ~500KB) untuk upload cepat</p>
+        <p>• 📍 Watermark GPS dan timestamp ditambahkan otomatis</p>
+        <p>• 📸 Gunakan foto yang jelas dan fokus</p>
+        <p>• ☁️ Upload langsung ke Cloudinary (hemat bandwidth)</p>
       </div>
     </div>
   )
