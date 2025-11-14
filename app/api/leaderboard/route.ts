@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
         // FALLBACK: Direct query if RPC function doesn't exist
         const { data: fallbackData, error: fallbackError } = await supabaseAdmin
           .from('user_statistics')
-          .select('username, total_entries, total_earnings, first_entry, last_entry')
+          .select('username, total_entries, total_earnings, avg_selisih, created_at, last_entry_date')
           .gt('total_entries', 0)
           .order('total_entries', { ascending: false })
           .limit(limit)
@@ -141,9 +141,9 @@ export async function GET(request: NextRequest) {
             username: user.username,
             total_entries: user.total_entries || 0,
             total_earnings: user.total_earnings || 0,
-            first_entry: user.first_entry,
-            last_entry: user.last_entry,
-            avg_selisih: 0, // Not available in fallback
+            first_entry: user.created_at, // Use created_at as first_entry
+            last_entry: user.last_entry_date, // Use last_entry_date as last_entry
+            avg_selisih: user.avg_selisih || 0,
           }))
         }
       } else {
