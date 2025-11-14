@@ -38,3 +38,23 @@ export interface LocationInfo extends GPSCoordinates {
   city?: string
   country?: string
 }
+
+export interface UserStatistics {
+  username: string
+  total_entries: number
+  daily_entries: number
+  total_earnings: number
+  daily_earnings: number
+  days_with_entries: number
+  last_entry_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface EntryFilter {
+  startDate?: string
+  endDate?: string
+  status?: string
+  search?: string
+  created_by?: string
+}

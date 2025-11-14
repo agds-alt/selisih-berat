@@ -134,6 +134,36 @@ export type Database = {
         }
         Relationships: []
       }
+      settings: {
+        Row: {
+          id: number
+          key: string
+          value: string
+          description: string | null
+          type: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          key: string
+          value: string
+          description?: string | null
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          key?: string
+          value?: string
+          description?: string | null
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null
@@ -234,6 +264,23 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
       update_user_statistics: {
         Args: { p_username: string }
+        Returns: undefined
+      }
+      calculate_user_earnings: {
+        Args: { p_username: string }
+        Returns: {
+          username: string
+          total_entries: number
+          days_with_entries: number
+          rate_per_entry: number
+          daily_bonus: number
+          entries_earnings: number
+          bonus_earnings: number
+          total_earnings: number
+        }[]
+      }
+      update_user_statistics_earnings: {
+        Args: never
         Returns: undefined
       }
     }

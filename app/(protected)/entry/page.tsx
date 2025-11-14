@@ -10,6 +10,7 @@ import { BarcodeScanner } from '@/components/entry/barcode-scanner'
 import { PhotoUpload } from '@/components/entry/photo-upload'
 import { useToast } from '@/components/ui/toast'
 import { calculateSelisih } from '@/lib/utils/helpers'
+import { formatRupiah } from '@/lib/utils/earnings'
 import type { LocationInfo } from '@/lib/types/entry'
 
 export default function EntryPage() {
@@ -18,6 +19,8 @@ export default function EntryPage() {
   const [loading, setLoading] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [location, setLocation] = useState<LocationInfo | null>(null)
+  const [ratePerEntry, setRatePerEntry] = useState(500)
+  const [dailyBonus, setDailyBonus] = useState(50000)
 
   const [formData, setFormData] = useState({
     nama: '',
@@ -38,8 +41,32 @@ export default function EntryPage() {
     const token = localStorage.getItem('accessToken')
     if (!token) {
       router.push('/login')
+      return
     }
+
+    // Fetch earnings settings
+    fetchEarningsSettings()
   }, [router])
+
+  const fetchEarningsSettings = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const response = await fetch('/api/settings', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        setRatePerEntry(data.data.rate_per_entry)
+        setDailyBonus(data.data.daily_bonus)
+      }
+    } catch (error) {
+      console.error('Error fetching earnings settings:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -187,6 +214,32 @@ export default function EntryPage() {
                 </p>
               </div>
             )}
+
+            {/* Earnings Preview */}
+            <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-xl">💰</span>
+                  <h3 className="text-sm font-semibold text-gray-800">Earnings Preview</h3>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Per Entry</span>
+                  <span className="font-semibold text-gray-800">{formatRupiah(ratePerEntry)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>Daily Bonus (first entry of the day)</span>
+                  <span>{formatRupiah(dailyBonus)}</span>
+                </div>
+                <div className="pt-2 mt-2 border-t border-green-300">
+                  <p className="text-xs text-gray-600">
+                    💡 Tip: Make entries every day to earn the daily bonus!
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Photo Upload */}
             <PhotoUpload
