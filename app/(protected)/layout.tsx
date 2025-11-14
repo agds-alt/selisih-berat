@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InstallPrompt } from '@/components/ui/install-prompt'
+import { BottomNav } from '@/components/navigation/bottom-nav'
 
 export default function ProtectedLayout({
   children,
@@ -98,38 +99,11 @@ export default function ProtectedLayout({
         {children}
       </div>
 
-      {/* Mobile Bottom Navigation - Compact (64px) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
-        <div className={`grid gap-0.5 p-1.5`} style={{ gridTemplateColumns: `repeat(${visibleNavItems.length + 1}, minmax(0, 1fr))` }}>
-          {visibleNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center py-1.5 px-1 rounded-lg transition-colors active:scale-95 ${
-                pathname === item.href
-                  ? 'bg-primary-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-              style={{ minHeight: '56px' }}
-            >
-              <span className="text-lg mb-0.5">{item.icon}</span>
-              <span className="text-[10px] font-medium leading-tight truncate w-full text-center">{item.label}</span>
-            </Link>
-          ))}
+      {/* Mobile Bottom Navigation with Center SCAN button */}
+      {user && <BottomNav userRole={user.role} />}
 
-          <button
-            onClick={handleLogout}
-            className="flex flex-col items-center py-1.5 px-1 rounded-lg text-gray-700 hover:bg-gray-100 active:scale-95 transition-transform"
-            style={{ minHeight: '56px' }}
-          >
-            <span className="text-lg mb-0.5">🚪</span>
-            <span className="text-[10px] font-medium leading-tight">Logout</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Add bottom padding for mobile nav - reduced to 64px */}
-      <div className="md:hidden h-16"></div>
+      {/* Add bottom padding for mobile nav - 80px for elevated center button */}
+      <div className="md:hidden h-20"></div>
 
       {/* Install prompt (only shows if not installed) */}
       <InstallPrompt />
