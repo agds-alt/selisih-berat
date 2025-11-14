@@ -59,6 +59,7 @@ const PhotoCard = memo(function PhotoCard({
           src={photo.thumbnail_url}
           alt={photo.nama || 'Photo'}
           loading="lazy"
+          crossOrigin="anonymous"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
       </div>
