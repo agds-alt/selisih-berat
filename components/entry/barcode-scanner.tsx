@@ -12,7 +12,8 @@ export function BarcodeScanner({ onScan, onError }: Props) {
   const videoRef = useRef<HTMLDivElement>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [lastScanned, setLastScanned] = useState<string | null>(null)
+  const lastScannedRef = useRef<string | null>(null) // Use ref for synchronous updates
+  const isProcessingRef = useRef<boolean>(false) // Prevent concurrent processing
 
   useEffect(() => {
     return () => {
@@ -33,10 +34,15 @@ export function BarcodeScanner({ onScan, onError }: Props) {
       await initBarcodeScanner(
         videoRef.current,
         (code) => {
-          // Prevent duplicate scans
-          if (code === lastScanned) return
+          // Prevent concurrent processing (race condition fix)
+          if (isProcessingRef.current) return
 
-          setLastScanned(code)
+          // Prevent duplicate scans (synchronous check with ref)
+          if (code === lastScannedRef.current) return
+
+          // Mark as processing
+          isProcessingRef.current = true
+          lastScannedRef.current = code
 
           // Validate JNT barcode
           if (validateJNTBarcode(code)) {
@@ -45,6 +51,8 @@ export function BarcodeScanner({ onScan, onError }: Props) {
           } else {
             setError('Format barcode tidak valid untuk JNT')
             if (onError) onError('Format barcode tidak valid')
+            // Reset processing flag on error so user can try again
+            isProcessingRef.current = false
           }
         },
         (err) => {
@@ -62,7 +70,8 @@ export function BarcodeScanner({ onScan, onError }: Props) {
   const stopScanning = () => {
     stopBarcodeScanner()
     setIsScanning(false)
-    setLastScanned(null)
+    lastScannedRef.current = null
+    isProcessingRef.current = false
   }
 
   return (
