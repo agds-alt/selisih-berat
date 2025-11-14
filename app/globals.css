@@ -1,3 +1,5 @@
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -87,6 +89,7 @@
   .btn-primary {
     @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 transition-colors;
   }
+<<<<<<< HEAD
 
   .btn-secondary {
     @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors;
@@ -162,6 +165,15 @@
   /* Badge compact */
   .badge-mobile {
     @apply inline-block px-2 py-0.5 text-[10px] font-medium rounded-full;
+=======
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+>>>>>>> abf2e03 (enhanced all fitur)
   }
 }
 
@@ -177,6 +189,7 @@
   .space-compact > * + * {
     margin-top: 8px;
   }
+<<<<<<< HEAD
 
   .space-tight > * + * {
     margin-top: 4px;
@@ -209,6 +222,11 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100px;
+=======
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #fee2e2 0%, #ffffff 50%, #fecaca 100%);
+>>>>>>> abf2e03 (enhanced all fitur)
   }
 }
 
@@ -266,6 +284,7 @@
 /* Loading skeleton */
 .skeleton {
   @apply animate-pulse bg-gray-200 rounded;
+<<<<<<< HEAD
 }
 
 /* Toast animations (slide from right) */
@@ -298,6 +317,7 @@
 .toast-exit {
   animation: toastExit 0.3s ease-in forwards;
 }
+<<<<<<< HEAD
 
 /* Fade in animation */
 @keyframes fadeIn {
@@ -412,3 +432,8 @@ button {
     0 5px 15px rgba(220, 38, 38, 0.2),
     0 2px 4px rgba(0, 0, 0, 0.1);
 }
+=======
+=======
+}
+>>>>>>> e57b684 (babi)
+>>>>>>> abf2e03 (enhanced all fitur)
