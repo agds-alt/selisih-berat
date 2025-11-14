@@ -286,6 +286,7 @@ export default function EntryPage() {
             {/* Photo Upload */}
             <PhotoUpload
               location={location}
+              noResi={formData.no_resi}
               onUpload={(urls) => {
                 setFormData({
                   ...formData,
