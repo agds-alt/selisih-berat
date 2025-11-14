@@ -107,7 +107,8 @@ export const env = {
   cloudinary: {
     cloudName: getEnv('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'),
     uploadPreset: getEnv('NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET'),
-    folder: getEnv('NEXT_PUBLIC_CLOUDINARY_FOLDER', 'selisih-berat'),
+    // Default to 'weight-entries' to match production configuration
+    folder: getEnv('NEXT_PUBLIC_CLOUDINARY_FOLDER', 'weight-entries'),
   },
 
   // Security
