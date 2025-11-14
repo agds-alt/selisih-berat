@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { getCurrentLocation, formatCoordinates, type GPSError } from '@/lib/utils/gps'
 import type { LocationInfo } from '@/lib/types/entry'
 
@@ -16,7 +16,16 @@ export function LocationDisplay({ onLocationFetched }: Props) {
   const [showManualInput, setShowManualInput] = useState(false)
   const [manualAddress, setManualAddress] = useState('')
 
+  // Prevent React Strict Mode double-fetch in development
+  const hasFetchedRef = useRef(false)
+
   useEffect(() => {
+    // Prevent double-fetch from React Strict Mode
+    if (hasFetchedRef.current) {
+      return
+    }
+    hasFetchedRef.current = true
+
     // Check if user previously denied permission
     const denied = localStorage.getItem('gps-permission-denied')
     if (denied === 'true') {
@@ -29,6 +38,9 @@ export function LocationDisplay({ onLocationFetched }: Props) {
   }, [])
 
   const fetchLocation = async () => {
+    // Allow refetch when explicitly called (e.g., "Coba Lagi" button)
+    hasFetchedRef.current = true
+
     setLoading(true)
     setError(null)
     setPermissionDenied(false)
