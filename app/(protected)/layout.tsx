@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { InstallPrompt } from '@/components/ui/install-prompt'
 
 export default function ProtectedLayout({
   children,
@@ -129,6 +130,9 @@ export default function ProtectedLayout({
 
       {/* Add bottom padding for mobile nav - reduced to 64px */}
       <div className="md:hidden h-16"></div>
+
+      {/* Install prompt (only shows if not installed) */}
+      <InstallPrompt />
     </div>
   )
 }
