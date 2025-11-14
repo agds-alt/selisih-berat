@@ -75,23 +75,7 @@ function setCachedGeocode(lat: string, lon: string, data: any): void {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get client IP for rate limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
-               request.headers.get('x-real-ip') ||
-               'unknown'
-
-    // Check rate limit
-    if (!checkRateLimit(ip)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Rate limit exceeded. Please wait 1 second between requests.'
-        },
-        { status: 429 }
-      )
-    }
-
-    // Get and validate parameters
+    // Get and validate parameters FIRST
     const { searchParams } = new URL(request.url)
     const lat = searchParams.get('lat')
     const lon = searchParams.get('lon')
@@ -130,7 +114,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check cache first
+    // CHECK CACHE FIRST - Before rate limiting!
+    // This prevents 429 errors for repeated requests to same location
     const cached = getCachedGeocode(lat, lon)
     if (cached) {
       return NextResponse.json({
@@ -138,6 +123,22 @@ export async function GET(request: NextRequest) {
         data: cached,
         cached: true,
       })
+    }
+
+    // Get client IP for rate limiting (only for non-cached requests)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown'
+
+    // Check rate limit only for new geocoding requests
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Rate limit exceeded. Please wait 1 second between requests.'
+        },
+        { status: 429 }
+      )
     }
 
     // Fetch from Nominatim with proper headers

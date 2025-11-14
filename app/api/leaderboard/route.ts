@@ -33,15 +33,44 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
 
     if (type === 'daily') {
-      // Use database function for daily leaderboard (OPTIMIZED!)
-      const { data: leaderboardData, error: leaderboardError } = await supabaseAdmin.rpc(
+      // Try to use database function for daily leaderboard (OPTIMIZED!)
+      let leaderboardData: any[] = []
+
+      const { data: rpcData, error: leaderboardError } = await supabaseAdmin.rpc(
         'get_daily_top_performers',
         { limit_count: limit }
       )
 
       if (leaderboardError) {
-        console.error('Daily leaderboard error:', leaderboardError)
-        throw leaderboardError
+        console.error('Daily leaderboard RPC error:', leaderboardError)
+        console.log('Falling back to direct query...')
+
+        // FALLBACK: Direct query if RPC function doesn't exist
+        const today = new Date().toISOString().split('T')[0]
+        const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+          .from('user_statistics')
+          .select('username, daily_entries, daily_earnings, total_entries, last_entry_date')
+          .gte('last_entry_date', today)
+          .order('daily_entries', { ascending: false })
+          .limit(limit)
+
+        if (fallbackError) {
+          console.error('Fallback query error:', fallbackError)
+          // Return empty leaderboard instead of crashing
+          leaderboardData = []
+        } else {
+          // Format fallback data to match RPC format
+          leaderboardData = (fallbackData || []).map((user, index) => ({
+            rank: index + 1,
+            username: user.username,
+            daily_entries: user.daily_entries || 0,
+            daily_earnings: user.daily_earnings || 0,
+            total_entries: user.total_entries || 0,
+            avg_selisih: 0, // Not available in fallback
+          }))
+        }
+      } else {
+        leaderboardData = rpcData || []
       }
 
       // Get current user stats
@@ -81,15 +110,44 @@ export async function GET(request: NextRequest) {
         },
       })
     } else {
-      // Use database function for all-time leaderboard (OPTIMIZED!)
-      const { data: leaderboardData, error: leaderboardError } = await supabaseAdmin.rpc(
+      // Try to use database function for all-time leaderboard (OPTIMIZED!)
+      let leaderboardData: any[] = []
+
+      const { data: rpcData, error: leaderboardError } = await supabaseAdmin.rpc(
         'get_total_top_performers',
         { limit_count: limit }
       )
 
       if (leaderboardError) {
-        console.error('All-time leaderboard error:', leaderboardError)
-        throw leaderboardError
+        console.error('All-time leaderboard RPC error:', leaderboardError)
+        console.log('Falling back to direct query...')
+
+        // FALLBACK: Direct query if RPC function doesn't exist
+        const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+          .from('user_statistics')
+          .select('username, total_entries, total_earnings, first_entry, last_entry')
+          .gt('total_entries', 0)
+          .order('total_entries', { ascending: false })
+          .limit(limit)
+
+        if (fallbackError) {
+          console.error('Fallback query error:', fallbackError)
+          // Return empty leaderboard instead of crashing
+          leaderboardData = []
+        } else {
+          // Format fallback data to match RPC format
+          leaderboardData = (fallbackData || []).map((user, index) => ({
+            rank: index + 1,
+            username: user.username,
+            total_entries: user.total_entries || 0,
+            total_earnings: user.total_earnings || 0,
+            first_entry: user.first_entry,
+            last_entry: user.last_entry,
+            avg_selisih: 0, // Not available in fallback
+          }))
+        }
+      } else {
+        leaderboardData = rpcData || []
       }
 
       // Get current user stats
