@@ -17,6 +17,8 @@ export default function DataManagementPage() {
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [selectedEntries, setSelectedEntries] = useState<Set<number>>(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -209,6 +211,91 @@ export default function DataManagementPage() {
     setDateTo('')
   }
 
+  const handleBulkUpdate = async (status: 'approved' | 'rejected' | 'pending') => {
+    if (selectedEntries.size === 0) {
+      alert('Pilih minimal 1 entry untuk bulk update')
+      return
+    }
+
+    if (!confirm(`Yakin ingin mengubah ${selectedEntries.size} entries menjadi ${status}?`)) {
+      return
+    }
+
+    try {
+      setBulkActionLoading(true)
+      const token = localStorage.getItem('accessToken')
+
+      const response = await fetch('/api/entries/bulk-update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: Array.from(selectedEntries),
+          status
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert(`Berhasil update ${selectedEntries.size} entries!`)
+        setSelectedEntries(new Set())
+        fetchEntries() // Refresh data
+      } else {
+        alert(`Gagal update entries: ${data.message}`)
+      }
+    } catch (error) {
+      console.error('Bulk update error:', error)
+      alert('Terjadi kesalahan saat bulk update')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedEntries.size === 0) {
+      alert('Pilih minimal 1 entry untuk bulk delete')
+      return
+    }
+
+    if (!confirm(`PERINGATAN: Yakin ingin menghapus ${selectedEntries.size} entries? Tindakan ini tidak dapat dibatalkan!`)) {
+      return
+    }
+
+    try {
+      setBulkActionLoading(true)
+      const token = localStorage.getItem('accessToken')
+
+      const response = await fetch('/api/entries/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: Array.from(selectedEntries)
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert(`Berhasil menghapus ${selectedEntries.size} entries!`)
+        setSelectedEntries(new Set())
+        fetchEntries() // Refresh data
+      } else {
+        alert(`Gagal menghapus entries: ${data.message}`)
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error)
+      alert('Terjadi kesalahan saat bulk delete')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
   if (!user || user.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -322,6 +409,69 @@ export default function DataManagementPage() {
               </div>
             </div>
 
+            {/* Bulk Actions */}
+            <div className="pt-4 border-t">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
+                Bulk Actions {selectedEntries.size > 0 && (
+                  <span className="text-sm font-normal text-gray-600">
+                    ({selectedEntries.size} selected)
+                  </span>
+                )}
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => handleBulkUpdate('approved')}
+                  disabled={bulkActionLoading || selectedEntries.size === 0}
+                  loading={bulkActionLoading}
+                  className="flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Bulk Approve
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => handleBulkUpdate('rejected')}
+                  disabled={bulkActionLoading || selectedEntries.size === 0}
+                  loading={bulkActionLoading}
+                  className="flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Bulk Reject
+                </Button>
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={handleBulkDelete}
+                  disabled={bulkActionLoading || selectedEntries.size === 0}
+                  loading={bulkActionLoading}
+                  className="flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Bulk Delete
+                </Button>
+                {selectedEntries.size > 0 && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => setSelectedEntries(new Set())}
+                    disabled={bulkActionLoading}
+                    className="flex items-center gap-2"
+                  >
+                    Clear Selection
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Export Buttons */}
             <div className="pt-4 border-t">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Export Data</h2>
@@ -364,6 +514,8 @@ export default function DataManagementPage() {
             loading={loading}
             onDelete={handleDelete}
             isAdmin={true}
+            selectedEntries={selectedEntries}
+            onSelectionChange={setSelectedEntries}
           />
         </Card>
       </div>

@@ -11,6 +11,8 @@ interface EntriesTableProps {
   loading?: boolean
   onDelete?: (id: number) => void
   isAdmin?: boolean
+  selectedEntries?: Set<number>
+  onSelectionChange?: (selected: Set<number>) => void
 }
 
 type SortField = 'id' | 'no_resi' | 'nama' | 'berat_aktual' | 'selisih' | 'status' | 'created_at'
@@ -20,7 +22,9 @@ export function EntriesTable({
   entries,
   loading = false,
   onDelete,
-  isAdmin = false
+  isAdmin = false,
+  selectedEntries = new Set<number>(),
+  onSelectionChange
 }: EntriesTableProps) {
   const [sortField, setSortField] = useState<SortField>('id')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
@@ -70,6 +74,41 @@ export function EntriesTable({
     setRowsPerPage(newRowsPerPage)
     setCurrentPage(1)
   }
+
+  const handleSelectAll = () => {
+    if (!onSelectionChange) return
+
+    const allCurrentPageIds = paginatedEntries.map(e => e.id)
+    const newSelected = new Set(selectedEntries)
+
+    // If all on this page are selected, deselect them
+    const allSelected = allCurrentPageIds.every(id => selectedEntries.has(id))
+
+    if (allSelected) {
+      allCurrentPageIds.forEach(id => newSelected.delete(id))
+    } else {
+      allCurrentPageIds.forEach(id => newSelected.add(id))
+    }
+
+    onSelectionChange(newSelected)
+  }
+
+  const handleSelectEntry = (id: number) => {
+    if (!onSelectionChange) return
+
+    const newSelected = new Set(selectedEntries)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    onSelectionChange(newSelected)
+  }
+
+  const allOnPageSelected = paginatedEntries.length > 0 &&
+    paginatedEntries.every(e => selectedEntries.has(e.id))
+  const someOnPageSelected = paginatedEntries.some(e => selectedEntries.has(e.id)) &&
+    !allOnPageSelected
 
   const getSelisihColor = (selisih: number) => {
     const abs = Math.abs(selisih)
@@ -131,6 +170,19 @@ export function EntriesTable({
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
+              {onSelectionChange && (
+                <th className="text-center py-3 px-4 w-12">
+                  <input
+                    type="checkbox"
+                    checked={allOnPageSelected}
+                    ref={(input) => {
+                      if (input) input.indeterminate = someOnPageSelected
+                    }}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                  />
+                </th>
+              )}
               <th
                 className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => handleSort('id')}
@@ -204,6 +256,16 @@ export function EntriesTable({
           <tbody>
             {paginatedEntries.map((entry) => (
               <tr key={entry.id} className="border-b hover:bg-gray-50 transition-colors">
+                {onSelectionChange && (
+                  <td className="text-center py-3 px-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedEntries.has(entry.id)}
+                      onChange={() => handleSelectEntry(entry.id)}
+                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                    />
+                  </td>
+                )}
                 <td className="py-3 px-4 font-semibold text-gray-900">{entry.id}</td>
                 <td className="py-3 px-4 font-mono text-sm text-gray-700">{entry.no_resi}</td>
                 <td className="py-3 px-4 text-gray-900">{entry.nama}</td>
