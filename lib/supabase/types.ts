@@ -95,12 +95,97 @@ export type Database = {
         }
         Relationships: []
       }
+      entries_backup_20250114: {
+        Row: {
+          berat_aktual: number | null
+          berat_resi: number | null
+          catatan: string | null
+          created_at: string | null
+          created_by: string | null
+          foto_url_1: string | null
+          foto_url_2: string | null
+          id: number | null
+          nama: string | null
+          no_resi: string | null
+          notes: string | null
+          selisih: number | null
+          status: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          berat_aktual?: number | null
+          berat_resi?: number | null
+          catatan?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          foto_url_1?: string | null
+          foto_url_2?: string | null
+          id?: number | null
+          nama?: string | null
+          no_resi?: string | null
+          notes?: string | null
+          selisih?: number | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          berat_aktual?: number | null
+          berat_resi?: number | null
+          catatan?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          foto_url_1?: string | null
+          foto_url_2?: string | null
+          id?: number | null
+          nama?: string | null
+          no_resi?: string | null
+          notes?: string | null
+          selisih?: number | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          description: string | null
+          id: number
+          key: string
+          type: string | null
+          updated_at: string | null
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          key: string
+          type?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          key?: string
+          type?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       user_statistics: {
         Row: {
           avg_selisih: number | null
           created_at: string | null
           daily_earnings: number | null
           daily_entries: number | null
+          days_with_entries: number | null
           id: number
           last_entry_date: string | null
           last_updated: string | null
@@ -113,6 +198,7 @@ export type Database = {
           created_at?: string | null
           daily_earnings?: number | null
           daily_entries?: number | null
+          days_with_entries?: number | null
           id?: number
           last_entry_date?: string | null
           last_updated?: string | null
@@ -125,6 +211,7 @@ export type Database = {
           created_at?: string | null
           daily_earnings?: number | null
           daily_entries?: number | null
+          days_with_entries?: number | null
           id?: number
           last_entry_date?: string | null
           last_updated?: string | null
@@ -134,33 +221,42 @@ export type Database = {
         }
         Relationships: []
       }
-      settings: {
+      user_statistics_backup_20250114: {
         Row: {
-          id: number
-          key: string
-          value: string
-          description: string | null
-          type: string
-          updated_at: string | null
-          updated_by: string | null
+          avg_selisih: number | null
+          created_at: string | null
+          daily_earnings: number | null
+          daily_entries: number | null
+          id: number | null
+          last_entry_date: string | null
+          last_updated: string | null
+          total_earnings: number | null
+          total_entries: number | null
+          username: string | null
         }
         Insert: {
-          id?: number
-          key: string
-          value: string
-          description?: string | null
-          type?: string
-          updated_at?: string | null
-          updated_by?: string | null
+          avg_selisih?: number | null
+          created_at?: string | null
+          daily_earnings?: number | null
+          daily_entries?: number | null
+          id?: number | null
+          last_entry_date?: string | null
+          last_updated?: string | null
+          total_earnings?: number | null
+          total_entries?: number | null
+          username?: string | null
         }
         Update: {
-          id?: number
-          key?: string
-          value?: string
-          description?: string | null
-          type?: string
-          updated_at?: string | null
-          updated_by?: string | null
+          avg_selisih?: number | null
+          created_at?: string | null
+          daily_earnings?: number | null
+          daily_entries?: number | null
+          id?: number | null
+          last_entry_date?: string | null
+          last_updated?: string | null
+          total_earnings?: number | null
+          total_entries?: number | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -237,6 +333,19 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_user_earnings: {
+        Args: { p_username: string }
+        Returns: {
+          bonus_earnings: number
+          daily_bonus: number
+          days_with_entries: number
+          entries_earnings: number
+          rate_per_entry: number
+          total_earnings: number
+          total_entries: number
+          username: string
+        }[]
+      }
       get_daily_top_performers: {
         Args: { limit_count?: number }
         Returns: {
@@ -266,23 +375,7 @@ export type Database = {
         Args: { p_username: string }
         Returns: undefined
       }
-      calculate_user_earnings: {
-        Args: { p_username: string }
-        Returns: {
-          username: string
-          total_entries: number
-          days_with_entries: number
-          rate_per_entry: number
-          daily_bonus: number
-          entries_earnings: number
-          bonus_earnings: number
-          total_earnings: number
-        }[]
-      }
-      update_user_statistics_earnings: {
-        Args: never
-        Returns: undefined
-      }
+      update_user_statistics_earnings: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
