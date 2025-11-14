@@ -3,7 +3,7 @@ import { withAuth } from '@/lib/middleware/auth'
 import { supabaseAdmin } from '@/lib/supabase/server'
 
 /**
- * GET /api/earnings/[username] - Get user earnings (OPTIMIZED with database function!)
+ * GET /api/earnings/[username] - Get user earnings
  */
 export const GET = withAuth(async (request, { params, user }) => {
   try {
@@ -17,52 +17,112 @@ export const GET = withAuth(async (request, { params, user }) => {
       )
     }
 
-    // Use database function for earnings calculation (OPTIMIZED!)
-    // This is 3-5x faster than manual calculation in app layer
-    const { data, error } = await supabaseAdmin.rpc('calculate_user_earnings', {
+    // Try database function first (OPTIMIZED!)
+    let earningsData = null
+    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('calculate_user_earnings', {
       p_username: username
     })
 
-    if (error) {
-      console.error('Calculate earnings error:', error)
-      throw error
-    }
+    if (rpcError) {
+      console.error('Calculate earnings RPC error:', rpcError)
+      console.log('Falling back to direct calculation...')
 
-    if (!data || data.length === 0) {
-      // No earnings data found, return default
-      return NextResponse.json({
-        success: true,
-        data: {
-          username,
-          totalEntries: 0,
-          daysWithEntries: 0,
-          ratePerEntry: 500,
-          dailyBonus: 50000,
-          totalEarnings: 0,
-          breakdown: {
-            fromEntries: 0,
-            fromBonus: 0
+      // FALLBACK: Manual calculation from user_statistics table
+      const { data: userStats, error: statsError } = await supabaseAdmin
+        .from('user_statistics')
+        .select('*')
+        .eq('username', username)
+        .single()
+
+      if (statsError || !userStats) {
+        console.error('User statistics error:', statsError)
+
+        // Return default empty earnings
+        return NextResponse.json({
+          success: true,
+          data: {
+            total_entries: 0,
+            days_with_entries: 0,
+            rate_per_entry: 500,
+            daily_bonus: 50000,
+            entries_earnings: 0,
+            bonus_earnings: 0,
+            total_earnings: 0
           }
-        }
-      })
-    }
+        })
+      }
 
-    const earnings = data[0]
+      // Get current settings for rates
+      const { data: settings } = await supabaseAdmin
+        .from('earnings_settings')
+        .select('rate_per_entry, daily_bonus')
+        .single()
+
+      const ratePerEntry = settings?.rate_per_entry || 500
+      const dailyBonus = settings?.daily_bonus || 50000
+
+      // Calculate earnings manually
+      const totalEntries = userStats.total_entries || 0
+
+      // Count distinct days from entries table (simple approach)
+      const { data: entriesData } = await supabaseAdmin
+        .from('entries')
+        .select('created_at')
+        .eq('created_by', username)
+
+      // Count unique dates
+      const uniqueDates = new Set(
+        (entriesData || []).map(entry =>
+          new Date(entry.created_at || '').toISOString().split('T')[0]
+        )
+      )
+      const daysWithEntries = uniqueDates.size
+
+      const entriesEarnings = totalEntries * ratePerEntry
+      const bonusEarnings = daysWithEntries * dailyBonus
+      const totalEarnings = entriesEarnings + bonusEarnings
+
+      earningsData = {
+        total_entries: totalEntries,
+        days_with_entries: daysWithEntries,
+        rate_per_entry: ratePerEntry,
+        daily_bonus: dailyBonus,
+        entries_earnings: entriesEarnings,
+        bonus_earnings: bonusEarnings,
+        total_earnings: totalEarnings
+      }
+    } else {
+      // Use RPC data
+      if (!rpcData || rpcData.length === 0) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            total_entries: 0,
+            days_with_entries: 0,
+            rate_per_entry: 500,
+            daily_bonus: 50000,
+            entries_earnings: 0,
+            bonus_earnings: 0,
+            total_earnings: 0
+          }
+        })
+      }
+
+      const earnings = rpcData[0]
+      earningsData = {
+        total_entries: earnings.total_entries,
+        days_with_entries: earnings.days_with_entries,
+        rate_per_entry: earnings.rate_per_entry,
+        daily_bonus: earnings.daily_bonus,
+        entries_earnings: earnings.entries_earnings,
+        bonus_earnings: earnings.bonus_earnings,
+        total_earnings: earnings.total_earnings
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      data: {
-        username: earnings.username,
-        totalEntries: earnings.total_entries,
-        daysWithEntries: earnings.days_with_entries,
-        ratePerEntry: earnings.rate_per_entry,
-        dailyBonus: earnings.daily_bonus,
-        totalEarnings: earnings.total_earnings,
-        breakdown: {
-          fromEntries: earnings.entries_earnings,
-          fromBonus: earnings.bonus_earnings
-        }
-      }
+      data: earningsData
     })
   } catch (error: any) {
     console.error('Earnings calculation error:', error)
