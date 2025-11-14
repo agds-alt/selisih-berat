@@ -69,9 +69,9 @@ function drawWatermark(
   height: number,
   options: WatermarkOptions
 ): void {
-  const padding = 20 // Reduced from 40
-  const lineHeight = 30 // Reduced from 60
-  const fontSize = 24 // Reduced from 48
+  const padding = 25 // Increased 25% from 20
+  const lineHeight = 38 // Increased 25% from 30
+  const fontSize = 30 // Increased 25% from 24
 
   // Semi-transparent overlay at bottom
   const overlayHeight = lineHeight * 4 + padding * 2
@@ -83,9 +83,9 @@ function drawWatermark(
   ctx.font = `bold ${fontSize}px Arial`
   ctx.textAlign = 'left'
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
-  ctx.shadowBlur = 4 // Reduced from 8
-  ctx.shadowOffsetX = 2 // Reduced from 4
-  ctx.shadowOffsetY = 2 // Reduced from 4
+  ctx.shadowBlur = 5 // Increased 25% from 4
+  ctx.shadowOffsetX = 3 // Increased 25% from 2
+  ctx.shadowOffsetY = 3 // Increased 25% from 2
 
   let yPosition = height - overlayHeight + padding + fontSize
 
@@ -111,7 +111,7 @@ function drawWatermark(
 
   // Draw location if available
   if (options.location.address) {
-    ctx.font = `${fontSize - 4}px Arial` // Reduced from fontSize - 8
+    ctx.font = `${fontSize - 4}px Arial` // 26px (30 - 4)
     const maxWidth = width - padding * 2
     const locationText = truncateText(ctx, options.location.address, maxWidth)
     ctx.fillText(`🌍 ${locationText}`, padding, yPosition)
@@ -119,7 +119,7 @@ function drawWatermark(
   }
 
   // Draw accuracy
-  ctx.font = `${fontSize - 6}px Arial` // Reduced from fontSize - 12
+  ctx.font = `${fontSize - 6}px Arial` // 24px (30 - 6)
   ctx.fillText(`✓ Accuracy: ±${Math.round(options.location.accuracy)}m`, padding, yPosition)
 
   // Reset shadow
