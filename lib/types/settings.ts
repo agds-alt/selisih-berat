@@ -9,7 +9,7 @@ export interface Setting {
   key: string
   value: string
   description: string | null
-  type: string
+  type: string | null
   updated_at: string | null
   updated_by: string | null
 }

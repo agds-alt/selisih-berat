@@ -18,8 +18,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             retry: 2,
             // Don't refetch on window focus in development
             refetchOnWindowFocus: process.env.NODE_ENV === 'production',
-            // Refetch on mount only if data is stale
-            refetchOnMount: 'stale',
+            // Refetch on mount
+            refetchOnMount: true,
           },
           mutations: {
             // Retry mutations once on failure

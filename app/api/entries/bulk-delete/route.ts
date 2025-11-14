@@ -22,7 +22,7 @@ export const POST = withAdmin(async (request, { user }) => {
     // Get entry details before deletion for audit log
     const { data: entriesToDelete } = await supabaseAdmin
       .from('entries')
-      .select('id, no_resi, created_by, berat_volumetrik, berat_aktual, selisih')
+      .select('id, no_resi, created_by, berat_resi, berat_aktual, selisih')
       .in('id', ids)
 
     // Delete all entries
@@ -52,8 +52,8 @@ export const POST = withAdmin(async (request, { user }) => {
           no_resi: e.no_resi,
           user: e.created_by,
           weights: {
-            volumetrik: e.berat_volumetrik,
-            aktual: e.berat_aktual,
+            berat_resi: e.berat_resi,
+            berat_aktual: e.berat_aktual,
             selisih: e.selisih
           }
         }))
