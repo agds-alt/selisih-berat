@@ -57,7 +57,7 @@ export default function ProtectedLayout({
       {/* Mobile Hamburger Button */}
       <button
         onClick={() => setIsMobileSidebarOpen(true)}
-        className="fixed top-4 left-4 z-30 md:hidden bg-white p-3 rounded-lg shadow-lg hover:shadow-xl active:scale-95 transition-all"
+        className="fixed top-4 right-4 z-30 md:hidden bg-white p-3 rounded-lg shadow-lg hover:shadow-xl active:scale-95 transition-all"
         aria-label="Open menu"
       >
         <svg
