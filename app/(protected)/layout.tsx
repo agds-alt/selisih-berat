@@ -36,6 +36,7 @@ export default function ProtectedLayout({
     { href: '/entry', label: 'Entry', icon: '➕', roles: ['user', 'admin'] },
     { href: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['user', 'admin'] },
     { href: '/leaderboard', label: 'Leaderboard', icon: '🏆', roles: ['user', 'admin'] },
+    { href: '/data-management', label: 'Data Management', icon: '📋', roles: ['admin'] },
     { href: '/foto-management', label: 'Foto Management', icon: '📸', roles: ['admin'] },
   ]
 
