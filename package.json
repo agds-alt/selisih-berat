@@ -19,11 +19,14 @@
   "dependencies": {
     "@ericblade/quagga2": "^1.8.4",
     "@supabase/supabase-js": "^2.81.1",
+<<<<<<< HEAD
     "@tanstack/react-query": "^5.90.8",
+=======
+    "@tailwindcss/postcss": "^4.1.17",
+>>>>>>> 6c6b6d2 (CSS for mobile first)
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.22",
     "bcryptjs": "^3.0.3",
     "browser-image-compression": "^2.0.2",
     "cloudinary": "^2.8.0",
@@ -35,9 +38,9 @@
     "next": "^14.2.33",
     "next-pwa": "^5.6.0",
     "papaparse": "^5.5.3",
-    "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "supabase": "2.58.5",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.4.18",
     "typescript": "^5.9.3",
@@ -49,6 +52,9 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/dompurify": "^3.0.5",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/papaparse": "^5.5.0"
+    "@types/papaparse": "^5.5.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.18"
   }
 }

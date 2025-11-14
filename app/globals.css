@@ -1,3 +1,5 @@
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -299,6 +301,7 @@
   animation: toastExit 0.3s ease-in forwards;
 }
 
+
 /* Fade in animation */
 @keyframes fadeIn {
   from {
@@ -368,6 +371,8 @@ button {
   -webkit-user-select: none;
   user-select: none;
 }
+
+
 
 /* Safe area insets for notched devices */
 @supports (padding: max(0px)) {
