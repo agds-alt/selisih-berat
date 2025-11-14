@@ -230,7 +230,6 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
           ref={input1Ref}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={(e) => handleFileChange(e.target.files?.[0] || null, 1)}
           className="hidden"
         />
@@ -253,7 +252,7 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
             ) : (
               <div className="flex flex-col items-center space-y-2">
                 <span className="text-4xl">📷</span>
-                <span className="text-gray-600">Klik untuk ambil foto 1</span>
+                <span className="text-gray-600">Ambil foto atau pilih dari galeri</span>
                 {!noResi || noResi.trim() === '' ? (
                   <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
                 ) : !location ? (
@@ -307,7 +306,6 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
           ref={input2Ref}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={(e) => handleFileChange(e.target.files?.[0] || null, 2)}
           className="hidden"
         />
@@ -330,7 +328,7 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
             ) : (
               <div className="flex flex-col items-center space-y-2">
                 <span className="text-4xl">📷</span>
-                <span className="text-gray-600">Klik untuk ambil foto 2</span>
+                <span className="text-gray-600">Ambil foto atau pilih dari galeri</span>
                 {!noResi || noResi.trim() === '' ? (
                   <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
                 ) : !location ? (
@@ -378,7 +376,7 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
         <p>• 📝 Foto dinamai otomatis berdasarkan No Resi untuk tracking mudah</p>
         <p>• 🗜️ Foto otomatis dikompresi 80-90% (4MB → ~500KB) untuk upload cepat</p>
         <p>• 📍 Watermark GPS dan timestamp ditambahkan otomatis</p>
-        <p>• 📸 Gunakan foto yang jelas dan fokus</p>
+        <p>• 📸 Bisa ambil foto baru atau pilih dari galeri</p>
         <p>• ☁️ Upload langsung ke Cloudinary (hemat bandwidth)</p>
       </div>
     </div>
