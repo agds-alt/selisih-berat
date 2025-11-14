@@ -60,31 +60,42 @@ export class AuthService {
 
   async login(username: string, password: string): Promise<AuthResponse> {
     try {
+      console.log('🔐 Login attempt for username:', username)
+
       // Find user
       const user = await userRepository.findByUsername(username)
       if (!user) {
+        console.log('❌ User not found:', username)
         return {
           success: false,
           message: 'Username atau password salah',
         }
       }
 
+      console.log('✅ User found:', username, 'ID:', user.id)
+
       // Check if user is active
       if (!user.is_active) {
+        console.log('❌ User is not active:', username)
         return {
           success: false,
           message: 'Akun Anda tidak aktif',
         }
       }
 
+      console.log('🔍 Verifying password...')
+
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password)
       if (!isPasswordValid) {
+        console.log('❌ Invalid password for user:', username)
         return {
           success: false,
           message: 'Username atau password salah',
         }
       }
+
+      console.log('✅ Password valid for user:', username)
 
       // Update last login
       await userRepository.updateLastLogin(user.id)
