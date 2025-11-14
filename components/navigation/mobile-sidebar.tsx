@@ -103,6 +103,19 @@ export function MobileSidebar({
             <div className="mt-4 pt-4 border-t border-primary-500/30">
               <p className="font-semibold text-white">{user.full_name || user.username}</p>
               <p className="text-sm text-primary-100 capitalize">{user.role}</p>
+
+              {/* Logout button in header for easy access */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-3 bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50"
+                onClick={() => {
+                  onLogout()
+                  onClose()
+                }}
+              >
+                🚪 Logout
+              </Button>
             </div>
           )}
         </div>
@@ -124,20 +137,6 @@ export function MobileSidebar({
             </Link>
           ))}
         </nav>
-
-        {/* Footer with Logout */}
-        <div className="p-4 border-t bg-gray-50">
-          <Button
-            variant="danger"
-            className="w-full"
-            onClick={() => {
-              onLogout()
-              onClose()
-            }}
-          >
-            🚪 Logout
-          </Button>
-        </div>
       </aside>
     </>
   )
