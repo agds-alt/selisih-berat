@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userRepository } from '@/lib/repositories/user.repository'
+import { supabaseAdmin } from '@/lib/supabase/server'
 import { getUserLevel } from '@/lib/utils/constants'
 import { verifyAccessToken } from '@/lib/utils/jwt'
 
@@ -30,51 +30,46 @@ export async function GET(request: NextRequest) {
     // Get query params
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'alltime' // 'daily' or 'alltime'
-
-    let leaderboardData
-    let currentUserStats
+    const limit = parseInt(searchParams.get('limit') || '10')
 
     if (type === 'daily') {
-      // Get daily leaderboard
-      leaderboardData = await userRepository.getDailyLeaderboard(10)
+      // Use database function for daily leaderboard (OPTIMIZED!)
+      const { data: leaderboardData, error: leaderboardError } = await supabaseAdmin.rpc(
+        'get_daily_top_performers',
+        { limit_count: limit }
+      )
 
-      // Get current user's rank
-      const userRank = await userRepository.getUserRank(currentUsername, 'daily')
+      if (leaderboardError) {
+        console.error('Daily leaderboard error:', leaderboardError)
+        throw leaderboardError
+      }
 
-      // Find current user in the data
-      const currentUserData = leaderboardData.find(u => u.username === currentUsername)
+      // Get current user stats
+      const { data: userStat } = await supabaseAdmin
+        .from('user_statistics')
+        .select('daily_entries, daily_earnings, total_entries')
+        .eq('username', currentUsername)
+        .single()
 
-      if (currentUserData) {
-        currentUserStats = {
-          rank: userRank,
-          username: currentUsername,
-          entries: currentUserData.daily_entries,
-          earnings: currentUserData.daily_earnings,
-          level: getUserLevel(currentUserData.total_entries || 0).name,
-        }
-      } else {
-        // User not in top 10, fetch their stats separately
-        const { data: userStat } = await require('@/lib/supabase/server').supabaseAdmin
-          .from('user_statistics')
-          .select('daily_entries, daily_earnings, total_entries')
-          .eq('username', currentUsername)
-          .single()
+      // Find user's rank in leaderboard
+      const currentUserData = leaderboardData?.find((u: any) => u.username === currentUsername)
+      const userRank = currentUserData?.rank || null
 
-        currentUserStats = {
-          rank: userRank,
-          username: currentUsername,
-          entries: userStat?.daily_entries || 0,
-          earnings: userStat?.daily_earnings || 0,
-          level: getUserLevel(userStat?.total_entries || 0).name,
-        }
+      const currentUserStats = {
+        rank: userRank,
+        username: currentUsername,
+        entries: userStat?.daily_entries || 0,
+        earnings: userStat?.daily_earnings || 0,
+        level: getUserLevel(userStat?.total_entries || 0).name,
       }
 
       // Format leaderboard
-      const leaderboard = leaderboardData.map((user, index) => ({
-        rank: index + 1,
+      const leaderboard = (leaderboardData || []).map((user: any) => ({
+        rank: user.rank,
         username: user.username,
         entries: user.daily_entries,
         earnings: user.daily_earnings,
+        avgSelisih: user.avg_selisih,
         level: getUserLevel(user.total_entries || 0).name,
       }))
 
@@ -86,46 +81,45 @@ export async function GET(request: NextRequest) {
         },
       })
     } else {
-      // Get all-time leaderboard
-      leaderboardData = await userRepository.getAllTimeLeaderboard(10)
+      // Use database function for all-time leaderboard (OPTIMIZED!)
+      const { data: leaderboardData, error: leaderboardError } = await supabaseAdmin.rpc(
+        'get_total_top_performers',
+        { limit_count: limit }
+      )
 
-      // Get current user's rank
-      const userRank = await userRepository.getUserRank(currentUsername, 'alltime')
+      if (leaderboardError) {
+        console.error('All-time leaderboard error:', leaderboardError)
+        throw leaderboardError
+      }
 
-      // Find current user in the data
-      const currentUserData = leaderboardData.find(u => u.username === currentUsername)
+      // Get current user stats
+      const { data: userStat } = await supabaseAdmin
+        .from('user_statistics')
+        .select('total_entries, total_earnings')
+        .eq('username', currentUsername)
+        .single()
 
-      if (currentUserData) {
-        currentUserStats = {
-          rank: userRank,
-          username: currentUsername,
-          entries: currentUserData.total_entries,
-          earnings: currentUserData.total_earnings,
-          level: getUserLevel(currentUserData.total_entries || 0).name,
-        }
-      } else {
-        // User not in top 10, fetch their stats separately
-        const { data: userStat } = await require('@/lib/supabase/server').supabaseAdmin
-          .from('user_statistics')
-          .select('total_entries, total_earnings')
-          .eq('username', currentUsername)
-          .single()
+      // Find user's rank in leaderboard
+      const currentUserData = leaderboardData?.find((u: any) => u.username === currentUsername)
+      const userRank = currentUserData?.rank || null
 
-        currentUserStats = {
-          rank: userRank,
-          username: currentUsername,
-          entries: userStat?.total_entries || 0,
-          earnings: userStat?.total_earnings || 0,
-          level: getUserLevel(userStat?.total_entries || 0).name,
-        }
+      const currentUserStats = {
+        rank: userRank,
+        username: currentUsername,
+        entries: userStat?.total_entries || 0,
+        earnings: userStat?.total_earnings || 0,
+        level: getUserLevel(userStat?.total_entries || 0).name,
       }
 
       // Format leaderboard
-      const leaderboard = leaderboardData.map((user, index) => ({
-        rank: index + 1,
+      const leaderboard = (leaderboardData || []).map((user: any) => ({
+        rank: user.rank,
         username: user.username,
         entries: user.total_entries,
         earnings: user.total_earnings,
+        avgSelisih: user.avg_selisih,
+        firstEntry: user.first_entry,
+        lastEntry: user.last_entry,
         level: getUserLevel(user.total_entries || 0).name,
       }))
 
