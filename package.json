@@ -50,7 +50,6 @@
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.90.2",
     "@types/bcryptjs": "^2.4.6",
-    "@types/dompurify": "^3.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/papaparse": "^5.5.0",
     "autoprefixer": "^10.4.0",

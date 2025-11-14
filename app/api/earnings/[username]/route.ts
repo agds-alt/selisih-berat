@@ -52,14 +52,20 @@ export const GET = withAuth(async (request, { params, user }) => {
         })
       }
 
-      // Get current settings for rates
-      const { data: settings } = await supabaseAdmin
-        .from('earnings_settings')
-        .select('rate_per_entry, daily_bonus')
-        .single()
+      // Get current settings for rates from settings table
+      const { data: settingsData } = await supabaseAdmin
+        .from('settings')
+        .select('key, value')
+        .in('key', ['rate_per_entry', 'daily_bonus'])
 
-      const ratePerEntry = settings?.rate_per_entry || 500
-      const dailyBonus = settings?.daily_bonus || 50000
+      // Parse settings into object
+      const settingsMap = (settingsData || []).reduce((acc, setting) => {
+        acc[setting.key] = setting.value
+        return acc
+      }, {} as Record<string, string>)
+
+      const ratePerEntry = settingsMap.rate_per_entry ? parseInt(settingsMap.rate_per_entry) : 500
+      const dailyBonus = settingsMap.daily_bonus ? parseInt(settingsMap.daily_bonus) : 50000
 
       // Calculate earnings manually
       const totalEntries = userStats.total_entries || 0
