@@ -16,6 +16,11 @@ export interface BarcodeConfig {
   locate: boolean
 }
 
+// Duplicate detection buffer
+let lastDetectedCode: string | null = null
+let lastDetectionTime: number = 0
+const DUPLICATE_DETECTION_WINDOW = 2000 // 2 seconds
+
 export function getDefaultBarcodeConfig(target: HTMLElement | string): BarcodeConfig {
   return {
     inputStream: {
@@ -36,6 +41,7 @@ export function getDefaultBarcodeConfig(target: HTMLElement | string): BarcodeCo
         'codabar_reader',
         'upc_reader',
         'upc_e_reader',
+        'qr_code_reader',
       ],
     },
     locate: true,
@@ -47,6 +53,10 @@ export async function initBarcodeScanner(
   onDetected: (code: string) => void,
   onError?: (error: any) => void
 ): Promise<void> {
+  // Reset duplicate detection on init
+  lastDetectedCode = null
+  lastDetectionTime = 0
+
   return new Promise((resolve, reject) => {
     const config = getDefaultBarcodeConfig(targetElement)
 
@@ -62,12 +72,22 @@ export async function initBarcodeScanner(
       resolve()
     })
 
-    // Listen for detected barcodes
+    // Listen for detected barcodes with duplicate prevention
     Quagga.onDetected((result) => {
       if (result.codeResult) {
         const code = result.codeResult.code
         if (code) {
-          onDetected(code)
+          const now = Date.now()
+
+          // Prevent duplicate scans within detection window
+          if (
+            code !== lastDetectedCode ||
+            now - lastDetectionTime > DUPLICATE_DETECTION_WINDOW
+          ) {
+            lastDetectedCode = code
+            lastDetectionTime = now
+            onDetected(code)
+          }
         }
       }
     })
@@ -75,7 +95,18 @@ export async function initBarcodeScanner(
 }
 
 export function stopBarcodeScanner(): void {
-  Quagga.stop()
+  try {
+    Quagga.stop()
+    // Clean up camera resources
+    Quagga.offDetected()
+    Quagga.offProcessed()
+
+    // Reset duplicate detection
+    lastDetectedCode = null
+    lastDetectionTime = 0
+  } catch (error) {
+    console.error('Error stopping barcode scanner:', error)
+  }
 }
 
 export function validateJNTBarcode(code: string): boolean {
@@ -83,4 +114,9 @@ export function validateJNTBarcode(code: string): boolean {
   // Typically: JNT + numbers, length 10-20 characters
   const jntPattern = /^[A-Z0-9]{10,20}$/
   return jntPattern.test(code)
+}
+
+export function resetDuplicateDetection(): void {
+  lastDetectedCode = null
+  lastDetectionTime = 0
 }

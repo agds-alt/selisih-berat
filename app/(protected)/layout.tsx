@@ -33,10 +33,18 @@ export default function ProtectedLayout({
   }
 
   const navItems = [
-    { href: '/entry', label: 'Entry', icon: '➕' },
-    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+    { href: '/entry', label: 'Entry', icon: '➕', roles: ['user', 'admin'] },
+    { href: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['user', 'admin'] },
+    { href: '/leaderboard', label: 'Leaderboard', icon: '🏆', roles: ['user', 'admin'] },
+    { href: '/data-management', label: 'Data Management', icon: '📋', roles: ['admin'] },
+    { href: '/foto-management', label: 'Foto Management', icon: '📸', roles: ['admin'] },
   ]
+
+  // Filter nav items based on user role
+  const visibleNavItems = navItems.filter((item) => {
+    if (!user) return true
+    return item.roles.includes(user.role)
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -48,7 +56,7 @@ export default function ProtectedLayout({
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -90,8 +98,8 @@ export default function ProtectedLayout({
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
-        <div className="grid grid-cols-4 gap-1 p-2">
-          {navItems.map((item) => (
+        <div className={`grid gap-1 p-2`} style={{ gridTemplateColumns: `repeat(${visibleNavItems.length + 1}, minmax(0, 1fr))` }}>
+          {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}

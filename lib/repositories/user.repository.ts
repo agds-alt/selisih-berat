@@ -157,6 +157,71 @@ export class UserRepository {
 
     return count || 0
   }
+
+  async getDailyLeaderboard(limit: number = 10) {
+    const { data, error } = await supabaseAdmin
+      .from('user_statistics')
+      .select('username, daily_entries, daily_earnings, total_entries')
+      .order('daily_entries', { ascending: false })
+      .order('daily_earnings', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('Error fetching daily leaderboard:', error)
+      throw new Error(error.message)
+    }
+
+    return data || []
+  }
+
+  async getAllTimeLeaderboard(limit: number = 10) {
+    const { data, error } = await supabaseAdmin
+      .from('user_statistics')
+      .select('username, total_entries, total_earnings')
+      .order('total_entries', { ascending: false })
+      .order('total_earnings', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('Error fetching all-time leaderboard:', error)
+      throw new Error(error.message)
+    }
+
+    return data || []
+  }
+
+  async getUserRank(username: string, type: 'daily' | 'alltime' = 'alltime'): Promise<number> {
+    try {
+      if (type === 'daily') {
+        // Get all users ordered by daily entries
+        const { data, error } = await supabaseAdmin
+          .from('user_statistics')
+          .select('username, daily_entries')
+          .order('daily_entries', { ascending: false })
+
+        if (error) throw new Error(error.message)
+
+        // Find the user's position
+        const position = data?.findIndex(u => u.username === username)
+        return position !== undefined && position !== -1 ? position + 1 : 0
+      } else {
+        // Get all users ordered by total entries
+        const { data, error } = await supabaseAdmin
+          .from('user_statistics')
+          .select('username, total_entries')
+          .order('total_entries', { ascending: false })
+
+        if (error) throw new Error(error.message)
+
+        // Find the user's position
+        const position = data?.findIndex(u => u.username === username)
+        return position !== undefined && position !== -1 ? position + 1 : 0
+      }
+    } catch (error: any) {
+      console.error('Error getting user rank:', error)
+      return 0
+    }
+  }
 }
 
 export const userRepository = new UserRepository()
