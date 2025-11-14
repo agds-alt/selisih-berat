@@ -284,7 +284,6 @@
 /* Loading skeleton */
 .skeleton {
   @apply animate-pulse bg-gray-200 rounded;
-<<<<<<< HEAD
 }
 
 /* Toast animations (slide from right) */
@@ -317,6 +316,7 @@
 .toast-exit {
   animation: toastExit 0.3s ease-in forwards;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 /* Fade in animation */
@@ -437,3 +437,5 @@ button {
 }
 >>>>>>> e57b684 (babi)
 >>>>>>> abf2e03 (enhanced all fitur)
+=======
+>>>>>>> 6b42c0c (penambahan fitur omzet)
