@@ -372,6 +372,8 @@ button {
   user-select: none;
 }
 
+
+
 /* Safe area insets for notched devices */
 @supports (padding: max(0px)) {
   body {
