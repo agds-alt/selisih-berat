@@ -1,13 +1,23 @@
 {
-  "name": "Weight Entry App - J&T Express",
-  "short_name": "WeightApp",
-  "description": "Professional weight tracking for logistics operations with 25,000+ entries",
+  "name": "Selisih Berat - J&T Express",
+  "short_name": "Selisih Berat",
+  "description": "Aplikasi pencatatan selisih berat untuk operasional logistik J&T Express dengan manajemen data profesional dan tracking real-time",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#dc2626",
   "orientation": "portrait",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "id",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
@@ -20,5 +30,53 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/entry.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Entry Baru",
+      "short_name": "Entry",
+      "description": "Buat entry selisih berat baru",
+      "url": "/entry",
+      "icons": [{ "src": "/icon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Lihat statistik dan dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "description": "Lihat peringkat pengguna",
+      "url": "/leaderboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "share_target": {
+    "action": "/entry",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "barcode",
+      "text": "notes"
+    }
+  }
 }
