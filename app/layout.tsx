@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-192.png',
+    icon: '/icon',
+    apple: '/apple-icon',
   },
 }
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <head>
         {/* PWA primary color */}
         <meta name="theme-color" content="#dc2626" />
@@ -39,12 +39,14 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="WeightApp" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
 
         {/* Android specific */}
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        {/* suppressHydrationWarning is added to prevent warnings from browser extensions
+            (e.g., ad blockers, Bing extensions) that inject attributes like bis_skin_checked */}
         <NetworkStatus />
         <QueryProvider>
           <ToastProvider>

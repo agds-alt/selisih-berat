@@ -71,11 +71,26 @@ export default function EntryPage() {
   const fetchEarningsSettings = async () => {
     try {
       const token = localStorage.getItem('accessToken')
+
+      // Don't make API call if no token available
+      if (!token) {
+        console.log('No access token available for fetching earnings settings')
+        return
+      }
+
       const response = await fetch('/api/settings', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
+
+      // Only log errors if it's not a 401 (unauthorized is expected for logged-out users)
+      if (!response.ok) {
+        if (response.status !== 401) {
+          console.error('Error fetching earnings settings:', response.status)
+        }
+        return
+      }
 
       const data = await response.json()
 
