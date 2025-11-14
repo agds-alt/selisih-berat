@@ -41,7 +41,14 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('accessToken')
-      const username = localStorage.getItem('userName')
+      const userData = localStorage.getItem('user')
+      const username = userData ? JSON.parse(userData).username : null
+
+      if (!username) {
+        showToast('Username tidak ditemukan', 'error')
+        router.push('/login')
+        return
+      }
 
       const response = await fetch(`/api/users/${username}/profile`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -69,7 +76,13 @@ export default function ProfilePage() {
 
     try {
       const token = localStorage.getItem('accessToken')
-      const username = localStorage.getItem('userName')
+      const userData = localStorage.getItem('user')
+      const username = userData ? JSON.parse(userData).username : null
+
+      if (!username) {
+        showToast('Username tidak ditemukan', 'error')
+        return
+      }
 
       const response = await fetch(`/api/users/${username}/profile`, {
         method: 'PUT',
