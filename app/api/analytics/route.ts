@@ -15,10 +15,10 @@ export const GET = withAdmin(async (request) => {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
-    // 1. ENTRIES OVER TIME (Line Chart)
+    // 1. ENTRIES OVER TIME (Line Chart) + data for summary stats
     const { data: entriesData } = await supabaseAdmin
       .from('entries')
-      .select('created_at')
+      .select('created_at, created_by, berat_aktual, selisih')
       .gte('created_at', startDate.toISOString())
       .order('created_at', { ascending: true })
 
@@ -56,11 +56,19 @@ export const GET = withAdmin(async (request) => {
       rejected: (statusData || []).filter(e => e.status === 'rejected').length
     }
 
-    // 4. SUMMARY STATS
-    const { data: summaryData } = await supabaseAdmin
-      .from('stats_summary')
-      .select('*')
-      .single()
+    // 4. SUMMARY STATS - Calculate from entries data
+    const totalEntries = (entriesData || []).length
+    const uniqueUsers = new Set((entriesData || []).map(e => e.created_by).filter(Boolean))
+    const totalUsers = uniqueUsers.size
+
+    const weights = (entriesData || []).map(e => e.berat_aktual || 0).filter(w => w > 0)
+    const avgWeight = weights.length > 0
+      ? weights.reduce((sum, w) => sum + w, 0) / weights.length
+      : 0
+
+    const totalDifference = (entriesData || [])
+      .map(e => e.selisih || 0)
+      .reduce((sum, s) => sum + s, 0)
 
     return NextResponse.json({
       success: true,
@@ -69,10 +77,10 @@ export const GET = withAdmin(async (request) => {
         topPerformers: topPerformersFormatted,
         statusDistribution,
         summary: {
-          totalEntries: summaryData?.total_entries || 0,
-          totalUsers: summaryData?.total_users || 0,
-          avgWeight: summaryData?.avg_weight || 0,
-          totalDifference: summaryData?.total_difference || 0
+          totalEntries,
+          totalUsers,
+          avgWeight,
+          totalDifference
         }
       }
     })
