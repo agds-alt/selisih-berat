@@ -14,8 +14,9 @@ export function ScannerModal({ isOpen, onClose, onScanSuccess }: Props) {
   const videoRef = useRef<HTMLDivElement>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [error, setError] = useState<string>('')
-  const [lastDetected, setLastDetected] = useState<string>('')
+  const lastDetectedRef = useRef<string>('') // Use ref instead of state for synchronous updates
   const detectionBufferRef = useRef<string[]>([])
+  const isProcessingRef = useRef<boolean>(false) // Prevent concurrent processing
 
   useEffect(() => {
     if (isOpen && videoRef.current) {
@@ -87,6 +88,12 @@ export function ScannerModal({ isOpen, onClose, onScanSuccess }: Props) {
       const code = result.codeResult.code
       if (!code) return
 
+      // Prevent concurrent processing (race condition fix)
+      if (isProcessingRef.current) return
+
+      // Check if this is a duplicate scan (synchronous check with ref)
+      if (lastDetectedRef.current === code) return
+
       // Add to buffer to prevent duplicate scans
       detectionBufferRef.current.push(code)
       if (detectionBufferRef.current.length > 10) {
@@ -96,8 +103,10 @@ export function ScannerModal({ isOpen, onClose, onScanSuccess }: Props) {
       // Check if code appears at least 3 times in buffer (confidence check)
       const occurrences = detectionBufferRef.current.filter((c) => c === code).length
 
-      if (occurrences >= 3 && lastDetected !== code) {
-        setLastDetected(code)
+      if (occurrences >= 3) {
+        // Mark as processing to prevent duplicate vibrations
+        isProcessingRef.current = true
+        lastDetectedRef.current = code
 
         // Success feedback (vibration if supported)
         if ('vibrate' in navigator) {
@@ -122,7 +131,8 @@ export function ScannerModal({ isOpen, onClose, onScanSuccess }: Props) {
       }
       setIsScanning(false)
       detectionBufferRef.current = []
-      setLastDetected('')
+      lastDetectedRef.current = ''
+      isProcessingRef.current = false
     }
   }
 
