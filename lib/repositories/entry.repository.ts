@@ -7,7 +7,7 @@ export class EntryRepository {
       .from('entries')
       .insert({
         ...entryData,
-        status: 'pending',
+        status: 'submitted',
         created_at: new Date().toISOString(),
       })
       .select()
