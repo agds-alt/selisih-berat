@@ -8,38 +8,90 @@ export interface ImageOptimizationOptions {
 
 /**
  * Compress and optimize image before upload
- * Reduces 4MB image to ~500KB-1MB (80-90% reduction)
+ * Uses adaptive compression based on file size to prevent corruption
+ * Includes validation and fallback to original if compression fails
  */
 export async function compressImage(
   file: File,
   options: ImageOptimizationOptions = {}
 ): Promise<File> {
-  const defaultOptions = {
-    maxSizeMB: 1, // Max 1MB
-    maxWidthOrHeight: 1920, // Max 1920px width/height
-    useWebWorker: true,
-    fileType: 'image/jpeg',
-    initialQuality: 0.8,
+  const fileSizeMB = file.size / 1024 / 1024
+
+  // STEP 1: Skip compression for small files (already efficient)
+  if (fileSizeMB < 1) {
+    console.log(`✅ File already optimized (${fileSizeMB.toFixed(2)}MB < 1MB), skipping compression`)
+    return file
+  }
+
+  // STEP 2: Determine adaptive compression settings based on file size
+  let maxSizeMB: number
+  let quality: number
+
+  if (fileSizeMB < 3) {
+    // Small-medium files: Light compression
+    maxSizeMB = 2
+    quality = 0.85
+  } else if (fileSizeMB < 5) {
+    // Medium files: Moderate compression
+    maxSizeMB = 2.5
+    quality = 0.85
+  } else if (fileSizeMB < 10) {
+    // Large files: More compression but maintain quality
+    maxSizeMB = 3
+    quality = 0.80
+  } else {
+    // Very large files: Aggressive but safe compression
+    maxSizeMB = 4
+    quality = 0.75
+  }
+
+  console.log(
+    `🎯 Adaptive compression: ${fileSizeMB.toFixed(2)}MB → target ${maxSizeMB}MB (quality: ${quality})`
+  )
+
+  const compressionOptions = {
+    maxSizeMB: options.maxSizeMB || maxSizeMB,
+    maxWidthOrHeight: options.maxWidthOrHeight || 2560, // Changed from 1920 to preserve detail
+    initialQuality: quality,
+    useWebWorker: options.useWebWorker !== undefined ? options.useWebWorker : true,
+    fileType: undefined, // Keep original format instead of forcing JPEG conversion
   }
 
   try {
-    const compressed = await imageCompression(file, {
-      ...defaultOptions,
-      ...options,
-    })
+    const compressed = await imageCompression(file, compressionOptions)
+
+    // VALIDATION 1: Check if compression produced empty file
+    if (!compressed || compressed.size === 0) {
+      console.error('❌ Compression produced empty file, using original')
+      return file
+    }
+
+    const compressedSizeMB = compressed.size / 1024 / 1024
+    const reduction = ((fileSizeMB - compressedSizeMB) / fileSizeMB) * 100
 
     console.log(
-      `✅ Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(
-        compressed.size /
-        1024 /
-        1024
-      ).toFixed(2)}MB (${Math.round(((file.size - compressed.size) / file.size) * 100)}% reduction)`
+      `✅ Compressed: ${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${reduction.toFixed(1)}% reduction)`
     )
+
+    // VALIDATION 2: Check if compression was too aggressive (>90% reduction is suspicious)
+    if (reduction > 90) {
+      console.warn(
+        `⚠️ Compression too aggressive (${reduction.toFixed(1)}% > 90%), might be corrupted, using original`
+      )
+      return file
+    }
+
+    // VALIDATION 3: Check if compressed file is larger than original
+    if (compressed.size > file.size) {
+      console.log('ℹ️ Compressed size larger than original, using original')
+      return file
+    }
 
     return compressed
   } catch (error) {
-    console.error('Image compression failed:', error)
-    throw new Error('Gagal mengompress gambar')
+    console.error('❌ Compression error:', error)
+    console.log('↩️ Using original file due to compression error')
+    return file // Always fallback to original if compression fails
   }
 }
 
