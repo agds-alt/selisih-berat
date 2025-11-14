@@ -158,11 +158,8 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
       // Step 2: Compress image (15%)
       setProgress('Kompresi gambar... (15%)')
       const originalSize = (file.size / 1024 / 1024).toFixed(2)
-      const compressedFile = await compressImage(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      })
+      // Use adaptive compression (no hardcoded options to allow adaptive logic to work)
+      const compressedFile = await compressImage(file)
       const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(2)
       const reduction = Math.round(((file.size - compressedFile.size) / file.size) * 100)
 
