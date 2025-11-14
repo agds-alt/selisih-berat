@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -15,6 +15,7 @@ import type { LocationInfo } from '@/lib/types/entry'
 
 export default function EntryPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
@@ -22,9 +23,12 @@ export default function EntryPage() {
   const [ratePerEntry, setRatePerEntry] = useState(500)
   const [dailyBonus, setDailyBonus] = useState(50000)
 
+  // Get pre-filled no_resi from URL params (from scanner)
+  const prefilledNoResi = searchParams.get('no_resi') || ''
+
   const [formData, setFormData] = useState({
     nama: '',
-    no_resi: '',
+    no_resi: prefilledNoResi, // 👈 AUTO-FILL from scanner
     berat_resi: '',
     berat_aktual: '',
     foto_url_1: '',
@@ -44,9 +48,25 @@ export default function EntryPage() {
       return
     }
 
+    // If no_resi was pre-filled from scanner, show success toast
+    if (prefilledNoResi) {
+      showToast('Barcode berhasil di-scan! ✅', 'success')
+      // Focus on nama field for quick entry
+      setTimeout(() => {
+        document.getElementById('nama')?.focus()
+      }, 500)
+    }
+
     // Fetch earnings settings
     fetchEarningsSettings()
   }, [router])
+
+  // Update no_resi when URL param changes
+  useEffect(() => {
+    if (prefilledNoResi && prefilledNoResi !== formData.no_resi) {
+      setFormData((prev) => ({ ...prev, no_resi: prefilledNoResi }))
+    }
+  }, [prefilledNoResi])
 
   const fetchEarningsSettings = async () => {
     try {
@@ -146,7 +166,15 @@ export default function EntryPage() {
                 value={formData.no_resi}
                 onChange={(e) => setFormData({ ...formData, no_resi: e.target.value })}
                 placeholder="Scan atau masukkan no resi"
+                className={prefilledNoResi ? 'border-green-500 bg-green-50' : ''}
               />
+
+              {prefilledNoResi && (
+                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                  <span>✅</span>
+                  <span>Dari hasil scan barcode</span>
+                </p>
+              )}
 
               <Button
                 type="button"
@@ -174,6 +202,7 @@ export default function EntryPage() {
 
             {/* Nama */}
             <Input
+              id="nama"
               label="Nama"
               type="text"
               required

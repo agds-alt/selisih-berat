@@ -110,10 +110,51 @@ export function stopBarcodeScanner(): void {
 }
 
 export function validateJNTBarcode(code: string): boolean {
-  // JNT barcode format validation
-  // Typically: JNT + numbers, length 10-20 characters
-  const jntPattern = /^[A-Z0-9]{10,20}$/
-  return jntPattern.test(code)
+  if (!code || code.length < 5) return false
+
+  // Basic validation: check if starts with JT or JNT
+  const jntPattern = /^(JT|JNT)\d+/i
+  const isJNT = jntPattern.test(code)
+
+  // Also accept any alphanumeric code (for flexibility)
+  const alphanumericPattern = /^[A-Z0-9]{5,20}$/i
+  const isAlphanumeric = alphanumericPattern.test(code)
+
+  return isJNT || isAlphanumeric
+}
+
+/**
+ * Format barcode for display
+ */
+export function formatBarcode(code: string): string {
+  return code.toUpperCase().trim()
+}
+
+/**
+ * Sanitize barcode input
+ * Removes any non-alphanumeric characters
+ */
+export function sanitizeBarcode(code: string): string {
+  return code.replace(/[^A-Z0-9]/gi, '').toUpperCase()
+}
+
+/**
+ * Check if barcode is likely a valid shipping number
+ * More lenient validation for various carrier formats
+ */
+export function isValidShippingNumber(code: string): boolean {
+  if (!code) return false
+
+  // Remove whitespace
+  const cleaned = code.trim()
+
+  // Must be at least 5 characters
+  if (cleaned.length < 5) return false
+
+  // Must contain at least one letter or number
+  const hasAlphanumeric = /[A-Z0-9]/i.test(cleaned)
+
+  return hasAlphanumeric
 }
 
 export function resetDuplicateDetection(): void {
