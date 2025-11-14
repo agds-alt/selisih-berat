@@ -26,8 +26,10 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
   const [filename1, setFilename1] = useState<string | null>(null)
   const [filename2, setFilename2] = useState<string | null>(null)
 
-  const input1Ref = useRef<HTMLInputElement>(null)
-  const input2Ref = useRef<HTMLInputElement>(null)
+  const camera1Ref = useRef<HTMLInputElement>(null)
+  const camera2Ref = useRef<HTMLInputElement>(null)
+  const gallery1Ref = useRef<HTMLInputElement>(null)
+  const gallery2Ref = useRef<HTMLInputElement>(null)
   const previousNoResiRef = useRef<string>(noResi)
 
   // Warn user if No Resi changes after photos uploaded
@@ -108,11 +110,13 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
     // VALIDATION 1: Check if No Resi is filled
     if (!noResi || noResi.trim() === '') {
       setError('⚠️ Harap isi No Resi terlebih dahulu sebelum upload foto!')
-      // Clear the input
-      if (photoNumber === 1 && input1Ref.current) {
-        input1Ref.current.value = ''
-      } else if (photoNumber === 2 && input2Ref.current) {
-        input2Ref.current.value = ''
+      // Clear the inputs
+      if (photoNumber === 1) {
+        if (camera1Ref.current) camera1Ref.current.value = ''
+        if (gallery1Ref.current) gallery1Ref.current.value = ''
+      } else if (photoNumber === 2) {
+        if (camera2Ref.current) camera2Ref.current.value = ''
+        if (gallery2Ref.current) gallery2Ref.current.value = ''
       }
       // Auto-focus No Resi input
       setTimeout(() => {
@@ -226,41 +230,73 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
           📸 Foto 1 {required && <span className="text-red-500">*</span>}
         </label>
 
+        {/* Hidden file inputs */}
         <input
-          ref={input1Ref}
+          ref={camera1Ref}
           type="file"
           accept="image/*"
+          capture="environment"
+          onChange={(e) => handleFileChange(e.target.files?.[0] || null, 1)}
+          className="hidden"
+        />
+        <input
+          ref={gallery1Ref}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
           onChange={(e) => handleFileChange(e.target.files?.[0] || null, 1)}
           className="hidden"
         />
 
         {!preview1 ? (
-          <button
-            type="button"
-            onClick={() => input1Ref.current?.click()}
-            disabled={uploading1 || !location || !noResi || noResi.trim() === ''}
-            className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <div className="space-y-3">
             {uploading1 ? (
-              <div className="flex flex-col items-center space-y-2">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                <span className="font-semibold">{uploadProgress1}</span>
-                {compressionInfo1 && (
-                  <span className="text-xs text-green-600">✅ {compressionInfo1}</span>
-                )}
+              <div className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <span className="font-semibold">{uploadProgress1}</span>
+                  {compressionInfo1 && (
+                    <span className="text-xs text-green-600">✅ {compressionInfo1}</span>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center space-y-2">
-                <span className="text-4xl">📷</span>
-                <span className="text-gray-600">Ambil foto atau pilih dari galeri</span>
+              <>
+                {/* Side-by-side buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Camera button */}
+                  <button
+                    type="button"
+                    onClick={() => camera1Ref.current?.click()}
+                    disabled={!location || !noResi || noResi.trim() === ''}
+                    className="flex flex-col items-center justify-center gap-2 px-4 py-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-3xl">📷</span>
+                    <span className="font-medium text-sm">Kamera</span>
+                  </button>
+
+                  {/* Gallery button */}
+                  <button
+                    type="button"
+                    onClick={() => gallery1Ref.current?.click()}
+                    disabled={!location || !noResi || noResi.trim() === ''}
+                    className="flex flex-col items-center justify-center gap-2 px-4 py-6 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-3xl">🖼️</span>
+                    <span className="font-medium text-sm">Galeri</span>
+                  </button>
+                </div>
+
+                {/* Warning messages */}
                 {!noResi || noResi.trim() === '' ? (
-                  <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
+                  <p className="text-xs text-red-500 text-center">⚠️ Isi No Resi terlebih dahulu</p>
                 ) : !location ? (
-                  <span className="text-xs text-red-500">Tunggu GPS tersedia</span>
-                ) : null}
-              </div>
+                  <p className="text-xs text-red-500 text-center">⚠️ Tunggu GPS tersedia</p>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center">💡 Pilih kamera untuk foto baru atau galeri untuk foto yang sudah ada</p>
+                )}
+              </>
             )}
-          </button>
+          </div>
         ) : (
           <div className="photo-preview relative">
             <Image
@@ -286,7 +322,8 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
                 setPreview1(null)
                 setCompressionInfo1(null)
                 setFilename1(null)
-                if (input1Ref.current) input1Ref.current.value = ''
+                if (camera1Ref.current) camera1Ref.current.value = ''
+                if (gallery1Ref.current) gallery1Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
             >
@@ -302,41 +339,73 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
           📸 Foto 2 (Opsional)
         </label>
 
+        {/* Hidden file inputs */}
         <input
-          ref={input2Ref}
+          ref={camera2Ref}
           type="file"
           accept="image/*"
+          capture="environment"
+          onChange={(e) => handleFileChange(e.target.files?.[0] || null, 2)}
+          className="hidden"
+        />
+        <input
+          ref={gallery2Ref}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
           onChange={(e) => handleFileChange(e.target.files?.[0] || null, 2)}
           className="hidden"
         />
 
         {!preview2 ? (
-          <button
-            type="button"
-            onClick={() => input2Ref.current?.click()}
-            disabled={uploading2 || !location || !noResi || noResi.trim() === ''}
-            className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <div className="space-y-3">
             {uploading2 ? (
-              <div className="flex flex-col items-center space-y-2">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                <span className="font-semibold">{uploadProgress2}</span>
-                {compressionInfo2 && (
-                  <span className="text-xs text-green-600">✅ {compressionInfo2}</span>
-                )}
+              <div className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <span className="font-semibold">{uploadProgress2}</span>
+                  {compressionInfo2 && (
+                    <span className="text-xs text-green-600">✅ {compressionInfo2}</span>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center space-y-2">
-                <span className="text-4xl">📷</span>
-                <span className="text-gray-600">Ambil foto atau pilih dari galeri</span>
+              <>
+                {/* Side-by-side buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Camera button */}
+                  <button
+                    type="button"
+                    onClick={() => camera2Ref.current?.click()}
+                    disabled={!location || !noResi || noResi.trim() === ''}
+                    className="flex flex-col items-center justify-center gap-2 px-4 py-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-3xl">📷</span>
+                    <span className="font-medium text-sm">Kamera</span>
+                  </button>
+
+                  {/* Gallery button */}
+                  <button
+                    type="button"
+                    onClick={() => gallery2Ref.current?.click()}
+                    disabled={!location || !noResi || noResi.trim() === ''}
+                    className="flex flex-col items-center justify-center gap-2 px-4 py-6 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <span className="text-3xl">🖼️</span>
+                    <span className="font-medium text-sm">Galeri</span>
+                  </button>
+                </div>
+
+                {/* Warning messages */}
                 {!noResi || noResi.trim() === '' ? (
-                  <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
+                  <p className="text-xs text-red-500 text-center">⚠️ Isi No Resi terlebih dahulu</p>
                 ) : !location ? (
-                  <span className="text-xs text-red-500">Tunggu GPS tersedia</span>
-                ) : null}
-              </div>
+                  <p className="text-xs text-red-500 text-center">⚠️ Tunggu GPS tersedia</p>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center">💡 Pilih kamera untuk foto baru atau galeri untuk foto yang sudah ada</p>
+                )}
+              </>
             )}
-          </button>
+          </div>
         ) : (
           <div className="photo-preview relative">
             <Image
@@ -362,7 +431,8 @@ export function PhotoUpload({ onUpload, location, required = true, noResi }: Pro
                 setPreview2(null)
                 setCompressionInfo2(null)
                 setFilename2(null)
-                if (input2Ref.current) input2Ref.current.value = ''
+                if (camera2Ref.current) camera2Ref.current.value = ''
+                if (gallery2Ref.current) gallery2Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
             >
