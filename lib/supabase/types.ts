@@ -318,6 +318,17 @@ export type Database = {
         }
         Relationships: []
       }
+      stats_summary: {
+        Row: {
+          avg_weight: number | null
+          first_entry: string | null
+          latest_entry: string | null
+          total_difference: number | null
+          total_entries: number | null
+          total_users: number | null
+        }
+        Relationships: []
+      }
       total_top_performers: {
         Row: {
           avg_selisih: number | null
