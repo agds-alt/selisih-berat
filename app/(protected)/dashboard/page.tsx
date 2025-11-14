@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { StatsCard } from '@/components/charts/stats-card'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { EarningsCard } from '@/components/earnings/earnings-card'
 import { formatDate, formatNumber } from '@/lib/utils/helpers'
 import type { EntryStats } from '@/lib/types/entry'
 import type { Entry } from '@/lib/types/entry'
@@ -14,6 +15,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<EntryStats | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
+  const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
     // Check auth
@@ -21,6 +23,13 @@ export default function DashboardPage() {
     if (!token) {
       router.push('/login')
       return
+    }
+
+    // Get username
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      const user = JSON.parse(userData)
+      setUsername(user.username)
     }
 
     fetchData()
@@ -99,6 +108,13 @@ export default function DashboardPage() {
               icon="⚖️"
               variant="danger"
             />
+          </div>
+        )}
+
+        {/* Earnings Card */}
+        {username && (
+          <div className="mb-8">
+            <EarningsCard username={username} showBreakdown={true} />
           </div>
         )}
 

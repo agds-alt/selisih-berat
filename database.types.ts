@@ -134,6 +134,36 @@ export type Database = {
         }
         Relationships: []
       }
+      settings: {
+        Row: {
+          id: number
+          key: string
+          value: string
+          description: string | null
+          type: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          key: string
+          value: string
+          description?: string | null
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          key?: string
+          value?: string
+          description?: string | null
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null

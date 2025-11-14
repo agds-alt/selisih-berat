@@ -222,6 +222,77 @@ export class UserRepository {
       return 0
     }
   }
+
+  /**
+   * Calculate earnings for a specific user using database function
+   */
+  async calculateUserEarnings(username: string): Promise<{
+    total_entries: number
+    days_with_entries: number
+    rate_per_entry: number
+    daily_bonus: number
+    entries_earnings: number
+    bonus_earnings: number
+    total_earnings: number
+  } | null> {
+    try {
+      const { data, error } = await supabaseAdmin.rpc('calculate_user_earnings', {
+        p_username: username,
+      })
+
+      if (error) {
+        console.error('Error calculating user earnings:', error)
+        return null
+      }
+
+      return data && data.length > 0 ? data[0] : null
+    } catch (error: any) {
+      console.error('Error in calculateUserEarnings:', error)
+      return null
+    }
+  }
+
+  /**
+   * Get user statistics including earnings
+   */
+  async getUserStatistics(username: string) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('user_statistics')
+        .select('*')
+        .eq('username', username)
+        .single()
+
+      if (error) {
+        console.error('Error fetching user statistics:', error)
+        return null
+      }
+
+      return data
+    } catch (error: any) {
+      console.error('Error in getUserStatistics:', error)
+      return null
+    }
+  }
+
+  /**
+   * Update user statistics earnings (batch update for all users)
+   */
+  async updateAllUserEarnings(): Promise<boolean> {
+    try {
+      const { error } = await supabaseAdmin.rpc('update_user_statistics_earnings')
+
+      if (error) {
+        console.error('Error updating all user earnings:', error)
+        return false
+      }
+
+      return true
+    } catch (error: any) {
+      console.error('Error in updateAllUserEarnings:', error)
+      return false
+    }
+  }
 }
 
 export const userRepository = new UserRepository()

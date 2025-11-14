@@ -38,6 +38,7 @@ export default function ProtectedLayout({
     { href: '/leaderboard', label: 'Leaderboard', icon: '🏆', roles: ['user', 'admin'] },
     { href: '/data-management', label: 'Data Management', icon: '📋', roles: ['admin'] },
     { href: '/foto-management', label: 'Foto Management', icon: '📸', roles: ['admin'] },
+    { href: '/settings', label: 'Settings', icon: '⚙️', roles: ['admin'] },
   ]
 
   // Filter nav items based on user role
