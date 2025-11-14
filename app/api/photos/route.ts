@@ -232,13 +232,16 @@ export async function DELETE(request: NextRequest) {
         .eq('id', parseInt(entryId))
         .single()
 
-      if (entry && entry[field]) {
-        updates.push({
-          entryId: parseInt(entryId),
-          field,
-          url: entry[field],
-        })
-        photoUrls.push(entry[field])
+      if (entry && entry[field as keyof typeof entry]) {
+        const url = entry[field as keyof typeof entry]
+        if (url) {
+          updates.push({
+            entryId: parseInt(entryId),
+            field,
+            url,
+          })
+          photoUrls.push(url)
+        }
       }
     }
 
