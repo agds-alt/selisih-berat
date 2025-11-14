@@ -34,14 +34,14 @@ export function getDefaultBarcodeConfig(target: HTMLElement | string): BarcodeCo
     },
     decoder: {
       readers: [
-        'code_128_reader',
+        'code_128_reader', // Primary format for JNT barcodes
         'ean_reader',
         'ean_8_reader',
         'code_39_reader',
         'codabar_reader',
         'upc_reader',
         'upc_e_reader',
-        'qr_code_reader',
+        // 'qr_code_reader', // Removed: Quagga2 doesn't properly support QR codes (causes TypeError)
       ],
     },
     locate: true,
