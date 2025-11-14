@@ -92,13 +92,13 @@ export default function LeaderboardPage() {
 
   const getRankBadge = (rank: number) => {
     if (rank === 1) {
-      return <span className="text-3xl">🥇</span>
+      return <span className="text-2xl">🥇</span>
     } else if (rank === 2) {
-      return <span className="text-3xl">🥈</span>
+      return <span className="text-2xl">🥈</span>
     } else if (rank === 3) {
-      return <span className="text-3xl">🥉</span>
+      return <span className="text-2xl">🥉</span>
     } else {
-      return <span className="text-xl font-bold text-gray-500">#{rank}</span>
+      return <span className="text-base font-bold text-gray-500">#{rank}</span>
     }
   }
 
@@ -128,24 +128,22 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">🏆 Leaderboard</h1>
+      <div className="min-h-screen bg-gray-50 py-3 pb-16">
+        <div className="container mx-auto px-3 max-w-4xl">
+          <h1 className="text-lg font-bold text-gray-900 mb-3">🏆 Leaderboard</h1>
 
           {/* Tabs Skeleton */}
-          <div className="flex gap-4 mb-6">
-            <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="h-12 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
+          <div className="flex gap-2 mb-3">
+            <div className="h-10 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
+            <div className="h-10 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
           </div>
 
           {/* Leaderboard Skeleton */}
-          <Card>
-            <div className="p-6 space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse"></div>
-              ))}
-            </div>
-          </Card>
+          <div className="card-mobile space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -153,46 +151,44 @@ export default function LeaderboardPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">🏆 Leaderboard</h1>
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-6xl mb-4">😔</p>
-              <p className="text-xl font-semibold text-gray-700">No Data Available</p>
-              <p className="text-gray-500 mt-2">Belum ada data leaderboard</p>
-            </div>
-          </Card>
+      <div className="min-h-screen bg-gray-50 py-3 pb-16">
+        <div className="container mx-auto px-3 max-w-4xl">
+          <h1 className="text-lg font-bold text-gray-900 mb-3">🏆 Leaderboard</h1>
+          <div className="card-mobile text-center py-8">
+            <p className="text-4xl mb-3">😔</p>
+            <p className="text-base font-semibold text-gray-700">No Data Available</p>
+            <p className="text-xs text-gray-500 mt-1">Belum ada data leaderboard</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">🏆 Leaderboard</h1>
-          <div className="text-sm text-gray-500">
-            Your rank: <span className="font-bold text-primary-600">#{data.currentUser.rank}</span>
+    <div className="min-h-screen bg-gray-50 py-3 pb-16">
+      <div className="container mx-auto px-3 max-w-4xl">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-bold text-gray-900">🏆 Leaderboard</h1>
+          <div className="text-xs text-gray-500">
+            Rank: <span className="font-bold text-primary-600">#{data.currentUser.rank}</span>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 mb-3">
           <Button
             onClick={() => handleTabChange('daily')}
-            className={`flex-1 ${
+            className={`flex-1 text-sm ${
               activeTab === 'daily'
                 ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-700 border border-gray-300'
             }`}
           >
-            🌟 Daily Top
+            🌟 Daily
           </Button>
           <Button
             onClick={() => handleTabChange('alltime')}
-            className={`flex-1 ${
+            className={`flex-1 text-sm ${
               activeTab === 'alltime'
                 ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-700 border border-gray-300'
@@ -203,154 +199,142 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard */}
-        <Card>
-          <div className="p-6">
-            {data.leaderboard.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-6xl mb-4">📊</p>
-                <p className="text-xl font-semibold text-gray-700">No Entries Yet</p>
-                <p className="text-gray-500 mt-2">
-                  {activeTab === 'daily' ? 'Belum ada entries hari ini' : 'Belum ada entries'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {data.leaderboard.map((entry, index) => (
+        <div className="card-mobile">
+          {data.leaderboard.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-4xl mb-3">📊</p>
+              <p className="text-base font-semibold text-gray-700">No Entries Yet</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {activeTab === 'daily' ? 'Belum ada entries hari ini' : 'Belum ada entries'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {data.leaderboard.map((entry, index) => (
+                <div
+                  key={entry.username}
+                  className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all duration-300 ${getRankBackground(
+                    entry.rank
+                  )} ${
+                    entry.username === currentUsername ? 'ring-2 ring-primary-400 shadow-lg' : ''
+                  }`}
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                    animation: 'fadeInUp 0.5s ease-out forwards',
+                  }}
+                >
+                  {/* Rank Badge */}
+                  <div className="flex-shrink-0 w-12 text-center">
+                    {getRankBadge(entry.rank)}
+                  </div>
+
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                      {getInitials(entry.username)}
+                    </div>
+                  </div>
+
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-gray-900 truncate">{entry.username}</h3>
+                      {entry.username === currentUsername && (
+                        <span className="text-[10px] bg-primary-600 text-white px-1.5 py-0.5 rounded">
+                          YOU
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded mt-0.5 ${getLevelColor(
+                        entry.level
+                      )}`}
+                    >
+                      {entry.level}
+                    </span>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="text-right">
+                    <div className="font-bold text-xs text-gray-900">{entry.entries}</div>
+                    <div className="text-[10px] text-green-600 font-semibold">
+                      {formatCurrency(entry.earnings)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Current User (if not in top 10) */}
+              {data.currentUser.rank > 10 && (
+                <>
+                  <div className="text-center py-1">
+                    <span className="text-gray-400 text-xs">...</span>
+                  </div>
                   <div
-                    key={entry.username}
-                    className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all duration-300 ${getRankBackground(
-                      entry.rank
-                    )} ${
-                      entry.username === currentUsername ? 'ring-2 ring-primary-400 shadow-lg' : ''
-                    }`}
-                    style={{
-                      animationDelay: `${index * 100}ms`,
-                      animation: 'fadeInUp 0.5s ease-out forwards',
-                    }}
+                    className="flex items-center gap-2 p-2 rounded-lg border-2 bg-white border-primary-400 ring-2 ring-primary-200 shadow-lg"
                   >
                     {/* Rank Badge */}
-                    <div className="flex-shrink-0 w-16 text-center">
-                      {getRankBadge(entry.rank)}
+                    <div className="flex-shrink-0 w-12 text-center">
+                      <span className="text-base font-bold text-gray-500">
+                        #{data.currentUser.rank}
+                      </span>
                     </div>
 
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                        {getInitials(entry.username)}
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        {getInitials(data.currentUser.username)}
                       </div>
                     </div>
 
                     {/* User Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-gray-900">{entry.username}</h3>
-                        {entry.username === currentUsername && (
-                          <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded">
-                            YOU
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className={`text-xs font-semibold px-2 py-1 rounded ${getLevelColor(
-                            entry.level
-                          )}`}
-                        >
-                          {entry.level}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-bold text-sm text-gray-900 truncate">{data.currentUser.username}</h3>
+                        <span className="text-[10px] bg-primary-600 text-white px-1.5 py-0.5 rounded">
+                          YOU
                         </span>
                       </div>
+                      <span
+                        className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded mt-0.5 ${getLevelColor(
+                          data.currentUser.level
+                        )}`}
+                      >
+                        {data.currentUser.level}
+                      </span>
                     </div>
 
                     {/* Stats */}
                     <div className="text-right">
-                      <div className="font-bold text-gray-900">{entry.entries} entries</div>
-                      <div className="text-sm text-green-600 font-semibold">
-                        {formatCurrency(entry.earnings)}
+                      <div className="font-bold text-xs text-gray-900">
+                        {data.currentUser.entries}
+                      </div>
+                      <div className="text-[10px] text-green-600 font-semibold">
+                        {formatCurrency(data.currentUser.earnings)}
                       </div>
                     </div>
                   </div>
-                ))}
-
-                {/* Current User (if not in top 10) */}
-                {data.currentUser.rank > 10 && (
-                  <>
-                    <div className="text-center py-2">
-                      <span className="text-gray-400">...</span>
-                    </div>
-                    <div
-                      className="flex items-center gap-4 p-4 rounded-lg border-2 bg-white border-primary-400 ring-2 ring-primary-200 shadow-lg"
-                    >
-                      {/* Rank Badge */}
-                      <div className="flex-shrink-0 w-16 text-center">
-                        <span className="text-xl font-bold text-gray-500">
-                          #{data.currentUser.rank}
-                        </span>
-                      </div>
-
-                      {/* Avatar */}
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                          {getInitials(data.currentUser.username)}
-                        </div>
-                      </div>
-
-                      {/* User Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-gray-900">{data.currentUser.username}</h3>
-                          <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded">
-                            YOU
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className={`text-xs font-semibold px-2 py-1 rounded ${getLevelColor(
-                              data.currentUser.level
-                            )}`}
-                          >
-                            {data.currentUser.level}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="text-right">
-                        <div className="font-bold text-gray-900">
-                          {data.currentUser.entries} entries
-                        </div>
-                        <div className="text-sm text-green-600 font-semibold">
-                          {formatCurrency(data.currentUser.earnings)}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </Card>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Info Card */}
-        <Card className="mt-6">
-          <div className="p-6">
-            <h3 className="font-bold text-gray-900 mb-3">📊 Leaderboard Info</h3>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>
-                • <strong>Daily Top:</strong> Peringkat berdasarkan entries hari ini
-              </p>
-              <p>
-                • <strong>All Time:</strong> Peringkat berdasarkan total entries
-              </p>
-              <p>
-                • <strong>Earnings:</strong> Pendapatan dihitung berdasarkan akurasi dan level
-              </p>
-              <p>
-                • <strong>Levels:</strong> Beginner (0-99) → Bronze (100-499) → Silver (500-999) →
-                Gold (1000-4999) → Diamond (5000+)
-              </p>
-            </div>
+        <div className="card-mobile mt-3">
+          <h3 className="font-bold text-sm text-gray-900 mb-2">📊 Leaderboard Info</h3>
+          <div className="space-y-1.5 text-xs text-gray-600">
+            <p>
+              • <strong>Daily:</strong> Peringkat entries hari ini
+            </p>
+            <p>
+              • <strong>All Time:</strong> Peringkat total entries
+            </p>
+            <p>
+              • <strong>Levels:</strong> Beginner (0-99) → Bronze (100-499) → Silver (500-999) → Gold (1000-4999) → Diamond (5000+)
+            </p>
           </div>
-        </Card>
+        </div>
       </div>
 
       <style jsx>{`

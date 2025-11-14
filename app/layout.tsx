@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ToastProvider } from '@/components/ui/toast'
+import { NetworkStatus } from '@/components/ui/network-status'
 
 export const metadata: Metadata = {
   title: 'Weight Entry App - J&T Express',
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className="font-sans antialiased">
+        <NetworkStatus />
         <ToastProvider>
           {children}
         </ToastProvider>
