@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { addWatermarkToImage } from '@/lib/utils/watermark'
 import { compressImage, validateImageFile } from '@/lib/utils/image-optimization'
 import type { LocationInfo } from '@/lib/types/entry'
@@ -10,9 +10,10 @@ interface Props {
   onUpload: (urls: { foto_url_1: string; foto_url_2?: string }) => void
   location: LocationInfo | null
   required?: boolean
+  noResi: string  // ← ADD: No Resi for auto-renaming photos
 }
 
-export function PhotoUpload({ onUpload, location, required = true }: Props) {
+export function PhotoUpload({ onUpload, location, required = true, noResi }: Props) {
   const [uploading1, setUploading1] = useState(false)
   const [uploading2, setUploading2] = useState(false)
   const [preview1, setPreview1] = useState<string | null>(null)
@@ -22,13 +23,63 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
   const [compressionInfo2, setCompressionInfo2] = useState<string | null>(null)
   const [uploadProgress1, setUploadProgress1] = useState<string>('')
   const [uploadProgress2, setUploadProgress2] = useState<string>('')
+  const [filename1, setFilename1] = useState<string | null>(null)
+  const [filename2, setFilename2] = useState<string | null>(null)
 
   const input1Ref = useRef<HTMLInputElement>(null)
   const input2Ref = useRef<HTMLInputElement>(null)
+  const previousNoResiRef = useRef<string>(noResi)
 
-  const uploadToCloudinary = async (blob: Blob): Promise<string> => {
+  // Warn user if No Resi changes after photos uploaded
+  useEffect(() => {
+    if ((preview1 || preview2) && noResi !== previousNoResiRef.current && previousNoResiRef.current !== '') {
+      setError('⚠️ No Resi berubah! Foto yang sudah diupload tetap menggunakan nama lama. Hapus dan upload ulang jika perlu.')
+      setTimeout(() => setError(null), 5000)
+    }
+    previousNoResiRef.current = noResi
+  }, [noResi, preview1, preview2])
+
+  /**
+   * Sanitize and format filename based on No Resi
+   * Format: {NO_RESI}_foto{NUMBER}.{EXTENSION}
+   */
+  const sanitizeFilename = (str: string): string => {
+    // Remove invalid filename characters: / \ : * ? " < > |
+    return str.replace(/[/\\:*?"<>|]/g, '_').trim()
+  }
+
+  const createRenamedFilename = (originalFilename: string, photoNumber: 1 | 2): string => {
+    if (!noResi || noResi.trim() === '') {
+      return originalFilename
+    }
+
+    // Sanitize No Resi
+    const sanitized = sanitizeFilename(noResi)
+
+    // Limit No Resi length to keep filenames reasonable
+    const maxNoResiLength = 50
+    const truncated = sanitized.length > maxNoResiLength
+      ? sanitized.substring(0, maxNoResiLength)
+      : sanitized
+
+    // Get original file extension
+    const extension = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
+
+    // Create new filename: {NO_RESI}_foto{NUMBER}.{EXTENSION}
+    return `${truncated}_foto${photoNumber}.${extension}`
+  }
+
+  const uploadToCloudinary = async (blob: Blob, filename?: string): Promise<string> => {
     const formData = new FormData()
-    formData.append('file', blob)
+
+    // If filename provided, create a File object with the custom name
+    if (filename) {
+      const file = new File([blob], filename, { type: blob.type })
+      formData.append('file', file)
+    } else {
+      formData.append('file', blob)
+    }
+
     formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
     formData.append('folder', process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER!)
 
@@ -54,7 +105,24 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
   ) => {
     if (!file) return
 
-    // Check if location is available
+    // VALIDATION 1: Check if No Resi is filled
+    if (!noResi || noResi.trim() === '') {
+      setError('⚠️ Harap isi No Resi terlebih dahulu sebelum upload foto!')
+      // Clear the input
+      if (photoNumber === 1 && input1Ref.current) {
+        input1Ref.current.value = ''
+      } else if (photoNumber === 2 && input2Ref.current) {
+        input2Ref.current.value = ''
+      }
+      // Auto-focus No Resi input
+      setTimeout(() => {
+        const noResiInput = document.querySelector('input[type="text"]') as HTMLInputElement
+        noResiInput?.focus()
+      }, 100)
+      return
+    }
+
+    // VALIDATION 2: Check if location is available
     if (!location) {
       setError('Lokasi GPS belum tersedia. Mohon tunggu sebentar.')
       return
@@ -64,6 +132,11 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
     const setPreview = photoNumber === 1 ? setPreview1 : setPreview2
     const setProgress = photoNumber === 1 ? setUploadProgress1 : setUploadProgress2
     const setCompressionInfo = photoNumber === 1 ? setCompressionInfo1 : setCompressionInfo2
+    const setFilename = photoNumber === 1 ? setFilename1 : setFilename2
+
+    // Generate renamed filename
+    const renamedFilename = createRenamedFilename(file.name, photoNumber)
+    setFilename(renamedFilename)
 
     try {
       setError(null)
@@ -105,7 +178,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
 
       // Step 5: Upload to Cloudinary (80%)
       setProgress('Upload ke cloud... (80%)')
-      const cloudinaryUrl = await uploadToCloudinary(watermarkedBlob)
+      const cloudinaryUrl = await uploadToCloudinary(watermarkedBlob, renamedFilename)
 
       // Step 6: Finalize (100%)
       setProgress('Selesai! (100%)')
@@ -126,6 +199,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
       setError(`Gagal upload foto ${photoNumber}: ${err.message}`)
       setPreview(null)
       setCompressionInfo(null)
+      setFilename(null)
     } finally {
       setUploading(false)
     }
@@ -133,6 +207,13 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Info about auto-rename */}
+      {noResi && (
+        <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+          💡 Foto akan dinamai otomatis: <span className="font-mono font-semibold">{sanitizeFilename(noResi)}_foto1.jpg</span> dan <span className="font-mono font-semibold">{sanitizeFilename(noResi)}_foto2.jpg</span>
+        </div>
+      )}
+
       {error && (
         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -158,7 +239,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
           <button
             type="button"
             onClick={() => input1Ref.current?.click()}
-            disabled={uploading1 || !location}
+            disabled={uploading1 || !location || !noResi || noResi.trim() === ''}
             className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading1 ? (
@@ -173,9 +254,11 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               <div className="flex flex-col items-center space-y-2">
                 <span className="text-4xl">📷</span>
                 <span className="text-gray-600">Klik untuk ambil foto 1</span>
-                {!location && (
+                {!noResi || noResi.trim() === '' ? (
+                  <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
+                ) : !location ? (
                   <span className="text-xs text-red-500">Tunggu GPS tersedia</span>
-                )}
+                ) : null}
               </div>
             )}
           </button>
@@ -188,6 +271,11 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               height={300}
               className="rounded-lg"
             />
+            {filename1 && (
+              <div className="absolute top-2 left-2 bg-blue-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded">
+                📝 {filename1}
+              </div>
+            )}
             {compressionInfo1 && (
               <div className="absolute bottom-2 left-2 right-2 bg-green-600 bg-opacity-90 text-white text-xs p-2 rounded">
                 ✅ Terkompresi: {compressionInfo1}
@@ -198,6 +286,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               onClick={() => {
                 setPreview1(null)
                 setCompressionInfo1(null)
+                setFilename1(null)
                 if (input1Ref.current) input1Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
@@ -227,7 +316,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
           <button
             type="button"
             onClick={() => input2Ref.current?.click()}
-            disabled={uploading2 || !location}
+            disabled={uploading2 || !location || !noResi || noResi.trim() === ''}
             className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading2 ? (
@@ -242,9 +331,11 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               <div className="flex flex-col items-center space-y-2">
                 <span className="text-4xl">📷</span>
                 <span className="text-gray-600">Klik untuk ambil foto 2</span>
-                {!location && (
+                {!noResi || noResi.trim() === '' ? (
+                  <span className="text-xs text-red-500">⚠️ Isi No Resi dulu</span>
+                ) : !location ? (
                   <span className="text-xs text-red-500">Tunggu GPS tersedia</span>
-                )}
+                ) : null}
               </div>
             )}
           </button>
@@ -257,6 +348,11 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               height={300}
               className="rounded-lg"
             />
+            {filename2 && (
+              <div className="absolute top-2 left-2 bg-blue-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded">
+                📝 {filename2}
+              </div>
+            )}
             {compressionInfo2 && (
               <div className="absolute bottom-2 left-2 right-2 bg-green-600 bg-opacity-90 text-white text-xs p-2 rounded">
                 ✅ Terkompresi: {compressionInfo2}
@@ -267,6 +363,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
               onClick={() => {
                 setPreview2(null)
                 setCompressionInfo2(null)
+                setFilename2(null)
                 if (input2Ref.current) input2Ref.current.value = ''
               }}
               className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
@@ -278,6 +375,7 @@ export function PhotoUpload({ onUpload, location, required = true }: Props) {
       </div>
 
       <div className="text-xs text-gray-500 space-y-1">
+        <p>• 📝 Foto dinamai otomatis berdasarkan No Resi untuk tracking mudah</p>
         <p>• 🗜️ Foto otomatis dikompresi 80-90% (4MB → ~500KB) untuk upload cepat</p>
         <p>• 📍 Watermark GPS dan timestamp ditambahkan otomatis</p>
         <p>• 📸 Gunakan foto yang jelas dan fokus</p>
