@@ -41,10 +41,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.4.0",
-<<<<<<< HEAD
     "tailwindcss": "^3.4.18",
-=======
->>>>>>> da7bdf8 (second commit)
     "typescript": "^5.9.3",
     "xlsx": "^0.18.5",
     "zod": "^4.1.12"
