@@ -1,7 +1,7 @@
 {
-  "name": "Selisih Berat - J&T Express",
-  "short_name": "Selisih Berat",
-  "description": "Aplikasi pencatatan selisih berat untuk operasional logistik J&T Express dengan manajemen data profesional dan tracking real-time",
+  "name": "Weight Entry App - J&T Express",
+  "short_name": "WeightApp",
+  "description": "Professional weight tracking for logistics operations. Requires internet connection for photo uploads and data sync.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

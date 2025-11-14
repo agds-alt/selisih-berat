@@ -3,6 +3,8 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // IMPORTANT: Disable offline caching (app requires internet for uploads)
+  runtimeCaching: [], // Empty = no offline caching
   buildExcludes: [/middleware-manifest\.json$/],
 })
 

@@ -128,12 +128,12 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">📦 Entry Baru</h1>
+    <div className="min-h-screen bg-gray-50 py-3 pb-16">
+      <div className="container mx-auto px-3 max-w-4xl">
+        <h1 className="text-lg font-bold text-gray-900 mb-3">📦 Entry Baru</h1>
 
-        <Card>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="card-mobile">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Location Display */}
             <LocationDisplay onLocationFetched={setLocation} />
 
@@ -159,7 +159,7 @@ export default function EntryPage() {
               </Button>
 
               {showScanner && (
-                <div className="mt-4">
+                <div className="mt-3">
                   <BarcodeScanner
                     onScan={(code) => {
                       setFormData({ ...formData, no_resi: code })
@@ -183,7 +183,7 @@ export default function EntryPage() {
             />
 
             {/* Berat */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               <Input
                 label="Berat Resi (kg)"
                 type="number"
@@ -207,35 +207,33 @@ export default function EntryPage() {
 
             {/* Selisih Display */}
             {formData.berat_resi && formData.berat_aktual && (
-              <div className="p-4 bg-gray-100 rounded-lg">
-                <p className="text-sm font-semibold text-gray-700 mb-1">Selisih:</p>
-                <p className={`text-3xl font-bold ${getSelisihColor(selisih)}`}>
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <p className="text-xs font-semibold text-gray-700 mb-0.5">Selisih:</p>
+                <p className={`text-2xl font-bold ${getSelisihColor(selisih)}`}>
                   {selisih >= 0 ? '+' : ''}{selisih} kg
                 </p>
               </div>
             )}
 
             {/* Earnings Preview */}
-            <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">💰</span>
-                  <h3 className="text-sm font-semibold text-gray-800">Earnings Preview</h3>
-                </div>
+            <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+              <div className="flex items-center space-x-1.5 mb-2">
+                <span className="text-base">💰</span>
+                <h3 className="text-xs font-semibold text-gray-800">Earnings Preview</h3>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs">
                   <span className="text-gray-600">Per Entry</span>
                   <span className="font-semibold text-gray-800">{formatRupiah(ratePerEntry)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Daily Bonus (first entry of the day)</span>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Daily Bonus</span>
                   <span>{formatRupiah(dailyBonus)}</span>
                 </div>
-                <div className="pt-2 mt-2 border-t border-green-300">
-                  <p className="text-xs text-gray-600">
-                    💡 Tip: Make entries every day to earn the daily bonus!
+                <div className="pt-1.5 mt-1.5 border-t border-green-300">
+                  <p className="text-[10px] text-gray-600">
+                    💡 Make entries every day to earn the daily bonus!
                   </p>
                 </div>
               </div>
@@ -255,14 +253,14 @@ export default function EntryPage() {
 
             {/* Catatan */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
                 Catatan (Opsional)
               </label>
               <textarea
                 value={formData.catatan}
                 onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Catatan tambahan..."
               />
             </div>
@@ -278,7 +276,7 @@ export default function EntryPage() {
               {loading ? 'Menyimpan...' : '💾 Simpan Entry'}
             </Button>
           </form>
-        </Card>
+        </div>
       </div>
     </div>
   )

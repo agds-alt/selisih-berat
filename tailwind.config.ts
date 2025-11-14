@@ -8,6 +8,29 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',  // Small phones (iPhone SE, etc.)
+        'sm': '640px',  // Default Tailwind
+        'md': '768px',  // Tablet
+        'lg': '1024px', // Desktop
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
+      fontSize: {
+        // Mobile-optimized font sizes (compact like banking apps)
+        'mobile-xs': ['10px', { lineHeight: '14px' }],
+        'mobile-sm': ['12px', { lineHeight: '16px' }],
+        'mobile-base': ['14px', { lineHeight: '20px' }],
+        'mobile-lg': ['16px', { lineHeight: '24px' }],
+        'mobile-xl': ['18px', { lineHeight: '26px' }],
+      },
+      spacing: {
+        // Compact spacing for mobile
+        'tight': '4px',
+        'compact': '8px',
+        'comfortable': '12px',
+        'nav': '64px',  // Bottom nav height
+      },
       colors: {
         primary: {
           50: '#fef2f2',
@@ -37,6 +60,9 @@ const config: Config = {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+      },
+      scale: {
+        '98': '0.98',
       },
     },
   },
