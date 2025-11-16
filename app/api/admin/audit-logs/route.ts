@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAdmin } from '@/lib/middleware/auth'
 import { auditService } from '@/lib/services/audit.service'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/audit-logs
  * Get audit logs with filters (Admin only)

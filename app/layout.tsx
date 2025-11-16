@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ToastProvider } from '@/components/ui/toast'
 import { NetworkStatus } from '@/components/ui/network-status'
@@ -8,8 +8,6 @@ export const metadata: Metadata = {
   title: 'Weight Entry App - J&T Express',
   description: 'Professional weight tracking for logistics operations. Requires internet connection.',
   manifest: '/manifest.json',
-  themeColor: '#dc2626',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -22,6 +20,13 @@ export const metadata: Metadata = {
     icon: '/icon',
     apple: '/apple-icon',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#dc2626',
 }
 
 export default function RootLayout({

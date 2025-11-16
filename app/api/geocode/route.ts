@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // Simple in-memory rate limiter (1 request per second per Nominatim ToS)
 const rateLimitMap = new Map<string, number>()
 const RATE_LIMIT_WINDOW = 1000 // 1 second in milliseconds

@@ -3,6 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { getUserLevel } from '@/lib/utils/constants'
 import { verifyAccessToken } from '@/lib/utils/jwt'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Get auth token from header
