@@ -74,8 +74,8 @@ export default function LoginPage() {
             <Image
               src="/icon-192.png"
               alt="Audit Selisih Berat J&T Express"
-              width={120}
-              height={120}
+              width={180}
+              height={180}
               className="object-contain"
             />
           </div>

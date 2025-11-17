@@ -5,13 +5,13 @@ import { NetworkStatus } from '@/components/ui/network-status'
 import { QueryProvider } from '@/lib/providers/query-provider'
 
 export const metadata: Metadata = {
-  title: 'Weight Entry App - J&T Express',
-  description: 'Professional weight tracking for logistics operations. Requires internet connection.',
+  title: 'Audit Selisih Berat J&T Express',
+  description: 'Aplikasi audit dan tracking selisih berat untuk operasional logistik J&T Express.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'WeightApp',
+    title: 'Audit Selisih Berat',
   },
   formatDetection: {
     telephone: false,
@@ -43,7 +43,7 @@ export default function RootLayout({
         {/* iOS specific */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="WeightApp" />
+        <meta name="apple-mobile-web-app-title" content="Audit Selisih Berat" />
         <link rel="apple-touch-icon" href="/apple-icon" />
 
         {/* Android specific */}
