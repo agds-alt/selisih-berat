@@ -74,7 +74,7 @@ export default function LoginPage() {
             <div className="relative w-20 h-20 rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-3 shadow-lg">
               <Image
                 src="/icon-192.png"
-                alt="Selisih Berat JNT"
+                alt="Audit Selisih Berat J&T Express"
                 width={64}
                 height={64}
                 className="w-full h-full object-contain"
@@ -190,7 +190,7 @@ export default function LoginPage() {
         {/* Footer Info */}
         <div className="mt-8 pt-6 border-t border-gray-100">
           <p className="text-xs text-gray-500 text-center">
-            Selisih Berat JNT - J&T Express
+            Audit Selisih Berat J&T Express
           </p>
         </div>
       </div>

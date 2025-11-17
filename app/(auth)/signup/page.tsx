@@ -125,7 +125,7 @@ export default function SignupPage() {
             <div className="relative w-20 h-20 rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-3 shadow-lg">
               <Image
                 src="/icon-192.png"
-                alt="Selisih Berat JNT"
+                alt="Audit Selisih Berat J&T Express"
                 width={64}
                 height={64}
                 className="w-full h-full object-contain"
@@ -133,7 +133,7 @@ export default function SignupPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Daftar Akun Baru</h1>
-          <p className="text-gray-600">Bergabung dengan Selisih Berat JNT</p>
+          <p className="text-gray-600">Bergabung dengan Audit Selisih Berat J&T</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -284,7 +284,7 @@ export default function SignupPage() {
         {/* Footer Info */}
         <div className="mt-8 pt-6 border-t border-gray-100">
           <p className="text-xs text-gray-500 text-center">
-            Selisih Berat JNT - J&T Express
+            Audit Selisih Berat J&T Express
           </p>
         </div>
       </div>
