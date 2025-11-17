@@ -7,9 +7,7 @@ const PUBLIC_DIR = './public';
 
 const sizes = [
   { size: 192, name: 'icon-192.png' },
-  { size: 512, name: 'icon-512.png' },
-  { size: 32, name: 'favicon.png' },
-  { size: 180, name: 'apple-touch-icon.png' }
+  { size: 512, name: 'icon-512.png' }
 ];
 
 async function generateIcons() {
