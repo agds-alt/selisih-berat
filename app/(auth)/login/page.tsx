@@ -72,7 +72,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <Image
-              src="/icon-192.png"
+              src="/icon-latest.png"
               alt="Audit Selisih Berat J&T Express"
               width={180}
               height={180}
