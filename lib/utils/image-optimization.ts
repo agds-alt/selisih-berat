@@ -17,43 +17,45 @@ export async function compressImage(
 ): Promise<File> {
   const fileSizeMB = file.size / 1024 / 1024
 
-  // STEP 1: AGGRESSIVE COMPRESSION - Target ~70% reduction
-  // Goal: 1MB → ~300KB, 5MB → ~1.5MB
+  console.log(`📸 Input file: ${file.name}, type: ${file.type}, size: ${fileSizeMB.toFixed(2)}MB`)
+
+  // STEP 1: Conservative compression with size-based targeting
+  // Target: 70% reduction with quality control
   let maxSizeMB: number
-  let quality: number
+  let maxWidthOrHeight: number
 
   if (fileSizeMB < 1) {
-    // Small files: Target 30% of original size
-    maxSizeMB = fileSizeMB * 0.3
-    quality = 0.75
+    // Small files: Light compression
+    maxSizeMB = 0.5
+    maxWidthOrHeight = 2048
   } else if (fileSizeMB < 3) {
-    // Small-medium files: Aggressive compression
-    maxSizeMB = fileSizeMB * 0.35 // ~65% reduction
-    quality = 0.70
+    // Medium files: Target ~1MB
+    maxSizeMB = 1.2
+    maxWidthOrHeight = 2048
   } else if (fileSizeMB < 5) {
-    // Medium files: Strong compression
-    maxSizeMB = fileSizeMB * 0.30 // ~70% reduction
-    quality = 0.65
+    // Large files: Target ~1.5MB
+    maxSizeMB = 1.8
+    maxWidthOrHeight = 2048
   } else if (fileSizeMB < 10) {
-    // Large files: Very aggressive compression
-    maxSizeMB = fileSizeMB * 0.25 // ~75% reduction
-    quality = 0.60
+    // Very large files: Target ~3MB
+    maxSizeMB = 3.0
+    maxWidthOrHeight = 2560
   } else {
-    // Very large files: Maximum compression
-    maxSizeMB = fileSizeMB * 0.20 // ~80% reduction
-    quality = 0.55
+    // Huge files: Target ~4MB
+    maxSizeMB = 4.0
+    maxWidthOrHeight = 2560
   }
 
+  const targetReduction = Math.round((1 - maxSizeMB / fileSizeMB) * 100)
   console.log(
-    `🔥 Aggressive compression: ${fileSizeMB.toFixed(2)}MB → target ${maxSizeMB.toFixed(2)}MB (quality: ${quality}) - ~${Math.round((1 - maxSizeMB/fileSizeMB) * 100)}% reduction`
+    `🔥 Size-based compression: ${fileSizeMB.toFixed(2)}MB → target ${maxSizeMB.toFixed(2)}MB (~${targetReduction}% reduction)`
   )
 
   const compressionOptions = {
     maxSizeMB: options.maxSizeMB || maxSizeMB,
-    maxWidthOrHeight: options.maxWidthOrHeight || 1920, // Reduce from 2560 for more compression
-    initialQuality: quality,
+    maxWidthOrHeight: options.maxWidthOrHeight || maxWidthOrHeight,
+    maxIteration: 10, // Allow multiple iterations to reach target
     useWebWorker: options.useWebWorker !== undefined ? options.useWebWorker : true,
-    fileType: 'image/jpeg', // Force JPEG for better compression (WebP even better but compatibility)
   }
 
   try {
@@ -72,13 +74,21 @@ export async function compressImage(
       `✅ Compressed: ${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${reduction.toFixed(1)}% reduction)`
     )
 
-    // VALIDATION 2: Check if compression was too aggressive (>95% reduction is suspicious)
-    // Increased threshold since we're doing aggressive compression intentionally
-    if (reduction > 95) {
+    // VALIDATION 2: Check if compression was suspiciously aggressive
+    // Note: Some images (especially screenshots with large solid colors) can compress >90% safely
+    // Only reject if compression is EXTREME (>97%) which indicates likely corruption
+    if (reduction > 97) {
       console.warn(
-        `⚠️ Compression too aggressive (${reduction.toFixed(1)}% > 95%), might be corrupted, using original`
+        `⚠️ Compression too aggressive (${reduction.toFixed(1)}% > 97%), might be corrupted, using original`
       )
       return file
+    }
+
+    // Warning for high compression but still allow it
+    if (reduction > 85) {
+      console.warn(
+        `⚠️ High compression rate: ${reduction.toFixed(1)}% - This is normal for screenshots/simple images. Using compressed version.`
+      )
     }
 
     // VALIDATION 3: Check if compressed file is larger than original
