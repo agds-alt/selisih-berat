@@ -121,16 +121,14 @@ export default function SignupPage() {
       <div className="relative bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md animate-fade-in border border-gray-100">
         {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="relative w-20 h-20 rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-3 shadow-lg">
-              <Image
-                src="/icon-192.png"
-                alt="Audit Selisih Berat J&T Express"
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
-              />
-            </div>
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/icon-192.png"
+              alt="Audit Selisih Berat J&T Express"
+              width={120}
+              height={120}
+              className="object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Daftar Akun Baru</h1>
           <p className="text-gray-600">Bergabung dengan Audit Selisih Berat J&T</p>
