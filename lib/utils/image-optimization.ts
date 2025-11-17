@@ -17,44 +17,43 @@ export async function compressImage(
 ): Promise<File> {
   const fileSizeMB = file.size / 1024 / 1024
 
-  // STEP 1: Skip compression for small files (already efficient)
-  if (fileSizeMB < 1) {
-    console.log(`✅ File already optimized (${fileSizeMB.toFixed(2)}MB < 1MB), skipping compression`)
-    return file
-  }
-
-  // STEP 2: Determine adaptive compression settings based on file size
+  // STEP 1: AGGRESSIVE COMPRESSION - Target ~70% reduction
+  // Goal: 1MB → ~300KB, 5MB → ~1.5MB
   let maxSizeMB: number
   let quality: number
 
-  if (fileSizeMB < 3) {
-    // Small-medium files: Light compression
-    maxSizeMB = 2
-    quality = 0.85
-  } else if (fileSizeMB < 5) {
-    // Medium files: Moderate compression
-    maxSizeMB = 2.5
-    quality = 0.85
-  } else if (fileSizeMB < 10) {
-    // Large files: More compression but maintain quality
-    maxSizeMB = 3
-    quality = 0.80
-  } else {
-    // Very large files: Aggressive but safe compression
-    maxSizeMB = 4
+  if (fileSizeMB < 1) {
+    // Small files: Target 30% of original size
+    maxSizeMB = fileSizeMB * 0.3
     quality = 0.75
+  } else if (fileSizeMB < 3) {
+    // Small-medium files: Aggressive compression
+    maxSizeMB = fileSizeMB * 0.35 // ~65% reduction
+    quality = 0.70
+  } else if (fileSizeMB < 5) {
+    // Medium files: Strong compression
+    maxSizeMB = fileSizeMB * 0.30 // ~70% reduction
+    quality = 0.65
+  } else if (fileSizeMB < 10) {
+    // Large files: Very aggressive compression
+    maxSizeMB = fileSizeMB * 0.25 // ~75% reduction
+    quality = 0.60
+  } else {
+    // Very large files: Maximum compression
+    maxSizeMB = fileSizeMB * 0.20 // ~80% reduction
+    quality = 0.55
   }
 
   console.log(
-    `🎯 Adaptive compression: ${fileSizeMB.toFixed(2)}MB → target ${maxSizeMB}MB (quality: ${quality})`
+    `🔥 Aggressive compression: ${fileSizeMB.toFixed(2)}MB → target ${maxSizeMB.toFixed(2)}MB (quality: ${quality}) - ~${Math.round((1 - maxSizeMB/fileSizeMB) * 100)}% reduction`
   )
 
   const compressionOptions = {
     maxSizeMB: options.maxSizeMB || maxSizeMB,
-    maxWidthOrHeight: options.maxWidthOrHeight || 2560, // Changed from 1920 to preserve detail
+    maxWidthOrHeight: options.maxWidthOrHeight || 1920, // Reduce from 2560 for more compression
     initialQuality: quality,
     useWebWorker: options.useWebWorker !== undefined ? options.useWebWorker : true,
-    fileType: undefined, // Keep original format instead of forcing JPEG conversion
+    fileType: 'image/jpeg', // Force JPEG for better compression (WebP even better but compatibility)
   }
 
   try {
@@ -73,10 +72,11 @@ export async function compressImage(
       `✅ Compressed: ${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${reduction.toFixed(1)}% reduction)`
     )
 
-    // VALIDATION 2: Check if compression was too aggressive (>90% reduction is suspicious)
-    if (reduction > 90) {
+    // VALIDATION 2: Check if compression was too aggressive (>95% reduction is suspicious)
+    // Increased threshold since we're doing aggressive compression intentionally
+    if (reduction > 95) {
       console.warn(
-        `⚠️ Compression too aggressive (${reduction.toFixed(1)}% > 90%), might be corrupted, using original`
+        `⚠️ Compression too aggressive (${reduction.toFixed(1)}% > 95%), might be corrupted, using original`
       )
       return file
     }

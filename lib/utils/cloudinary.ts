@@ -146,11 +146,53 @@ export function generateThumbnailUrl(url: string, width: number = 300, height: n
   if (url.includes('cloudinary.com')) {
     const parts = url.split('/upload/')
     if (parts.length === 2) {
-      return `${parts[0]}/upload/w_${width},h_${height},c_fill,q_auto,f_auto/${parts[1]}`
+      // Aggressive optimization: f_auto (format), q_auto:good (quality), c_fill (crop)
+      return `${parts[0]}/upload/w_${width},h_${height},c_fill,q_auto:good,f_auto/${parts[1]}`
     }
   }
 
   return url
+}
+
+/**
+ * Optimize Cloudinary URL for delivery with aggressive compression
+ * Adds automatic format conversion (WebP/AVIF) and quality optimization
+ * This can save 40-60% bandwidth without visible quality loss
+ */
+export function optimizeCloudinaryUrl(url: string, options?: {
+  quality?: 'auto:low' | 'auto:good' | 'auto:best' | 'auto:eco'
+  format?: 'auto' | 'webp' | 'avif' | 'jpg'
+  width?: number
+  height?: number
+}): string {
+  if (!url) return ''
+  if (!url.includes('cloudinary.com')) return url
+
+  const parts = url.split('/upload/')
+  if (parts.length !== 2) return url
+
+  const {
+    quality = 'auto:good', // Good balance between quality and size
+    format = 'auto', // Let Cloudinary choose best format (WebP/AVIF)
+    width,
+    height
+  } = options || {}
+
+  // Build transformation string
+  const transformations: string[] = []
+
+  if (width) transformations.push(`w_${width}`)
+  if (height) transformations.push(`h_${height}`)
+  if (width || height) transformations.push('c_limit') // Limit size, don't crop
+
+  transformations.push(`q_${quality}`) // Auto quality
+  transformations.push(`f_${format}`) // Auto format (WebP/AVIF when supported)
+  transformations.push('fl_progressive') // Progressive loading
+  transformations.push('fl_lossy') // Lossy compression for smaller files
+
+  const transformString = transformations.join(',')
+
+  return `${parts[0]}/upload/${transformString}/${parts[1]}`
 }
 
 /**
