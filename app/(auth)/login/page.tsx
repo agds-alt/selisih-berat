@@ -79,8 +79,8 @@ export default function LoginPage() {
               className="object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Selamat Datang</h1>
-          <p className="text-gray-600">Masuk untuk melanjutkan</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Wilujeng Sumping !</h1>
+          <p className="text-gray-600">Mangga ka lebet</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
