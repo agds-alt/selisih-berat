@@ -74,7 +74,7 @@ export function MobileSidebar({
         <div className="p-6 border-b bg-gradient-to-r from-primary-600 to-primary-700">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">Weight Entry</h1>
+              <h1 className="text-xl font-bold text-white">Audit Selisih Berat</h1>
               <p className="text-sm text-primary-100">J&T Express</p>
             </div>
             <button
