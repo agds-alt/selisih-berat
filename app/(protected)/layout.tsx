@@ -87,8 +87,8 @@ export default function ProtectedLayout({
       {/* Desktop Sidebar */}
       <aside className="hidden md:fixed md:left-0 md:top-0 md:h-screen md:w-64 md:bg-white md:shadow-lg md:flex md:flex-col">
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-primary-600">Weight Entry</h1>
-          <p className="text-sm text-gray-600">J&T Express</p>
+          <h1 className="text-2xl font-bold text-primary-600">Audit Selisih Berat</h1>
+          <p className="text-sm text-gray-600">Agus Express</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
