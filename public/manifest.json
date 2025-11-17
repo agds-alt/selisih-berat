@@ -1,7 +1,7 @@
 {
-  "name": "Weight Entry App - J&T Express",
-  "short_name": "WeightApp",
-  "description": "Professional weight tracking for logistics operations. Requires internet connection for photo uploads and data sync.",
+  "name": "Audit Selisih Berat J&T Express",
+  "short_name": "Audit Serat",
+  "description": "Aplikasi audit dan tracking selisih berat untuk operasional logistik J&T Express. Memerlukan koneksi internet untuk upload foto dan sinkronisasi data.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
