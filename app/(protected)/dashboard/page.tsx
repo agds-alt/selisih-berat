@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<EntryStats | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
@@ -32,11 +33,22 @@ export default function DashboardPage() {
       setUsername(user.username)
     }
 
+    // Initial fetch
     fetchData()
+
+    // Auto-refresh every 30 seconds
+    const intervalId = setInterval(() => {
+      fetchData()
+    }, 30000) // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId)
   }, [router])
 
-  const fetchData = async () => {
+  const fetchData = async (showRefreshing = false) => {
     try {
+      if (showRefreshing) setRefreshing(true)
+
       const token = localStorage.getItem('accessToken')
 
       // Fetch stats
@@ -58,7 +70,12 @@ export default function DashboardPage() {
       console.error('Fetch error:', error)
     } finally {
       setLoading(false)
+      if (showRefreshing) setRefreshing(false)
     }
+  }
+
+  const handleRefresh = () => {
+    fetchData(true)
   }
 
   if (loading) {
@@ -72,7 +89,17 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-3 pb-16">
       <div className="container mx-auto px-3">
-        <h1 className="text-lg font-bold text-gray-900 mb-3">📊 Dashboard</h1>
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-lg font-bold text-gray-900">📊 Dashboard</h1>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            <span className={refreshing ? 'animate-spin' : ''}>🔄</span>
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
 
         {/* Stats Grid - 2x2 Mobile, 4x1 Desktop */}
         {stats && (
