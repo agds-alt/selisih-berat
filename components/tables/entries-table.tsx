@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatDateShort, formatTime } from '@/lib/utils/helpers'
 import type { Entry } from '@/lib/types/entry'
+import { EntryDetailModal } from '@/components/modals/entry-detail-modal'
 
 interface EntriesTableProps {
   entries: Entry[]
@@ -30,6 +31,8 @@ export function EntriesTable({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
 
   // Sort entries
   const sortedEntries = [...entries].sort((a, b) => {
@@ -103,6 +106,11 @@ export function EntriesTable({
       newSelected.add(id)
     }
     onSelectionChange(newSelected)
+  }
+
+  const handleRowClick = (entry: Entry) => {
+    setSelectedEntry(entry)
+    setDetailModalOpen(true)
   }
 
   const allOnPageSelected = paginatedEntries.length > 0 &&
@@ -255,9 +263,13 @@ export function EntriesTable({
           </thead>
           <tbody>
             {paginatedEntries.map((entry) => (
-              <tr key={entry.id} className="border-b hover:bg-gray-50 transition-colors">
+              <tr
+                key={entry.id}
+                className="border-b hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => handleRowClick(entry)}
+              >
                 {onSelectionChange && (
-                  <td className="text-center py-3 px-4">
+                  <td className="text-center py-3 px-4" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedEntries.has(entry.id)}
@@ -298,7 +310,7 @@ export function EntriesTable({
                   </div>
                 </td>
                 {isAdmin && (
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                     {onDelete && (
                       <Button
                         size="sm"
@@ -399,6 +411,13 @@ export function EntriesTable({
           </Button>
         </div>
       </div>
+
+      {/* Entry Detail Modal */}
+      <EntryDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        entry={selectedEntry}
+      />
     </div>
   )
 }

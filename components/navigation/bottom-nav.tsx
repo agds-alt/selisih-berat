@@ -10,6 +10,7 @@ interface NavItem {
   label: string
   icon: string
   adminOnly?: boolean
+  userOnly?: boolean
 }
 
 export function BottomNav({ userRole }: { userRole: string }) {
@@ -19,16 +20,24 @@ export function BottomNav({ userRole }: { userRole: string }) {
 
   const navItems: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+    { href: '/entry', label: 'Entry', icon: '➕', userOnly: true },
+    { href: '/data-management', label: 'Data', icon: '📋', adminOnly: true },
     // Center button is separate (SCAN)
+    { href: '/my-entries', label: 'My Entries', icon: '📝', userOnly: true },
+    { href: '/profile', label: 'Profile', icon: '👤', userOnly: true },
     { href: '/foto-management', label: 'Photos', icon: '📸', adminOnly: true },
     { href: '/settings', label: 'Settings', icon: '⚙️', adminOnly: true },
   ]
 
   // Filter by role
-  const visibleItems = navItems.filter(
-    (item) => !item.adminOnly || userRole === 'admin'
-  )
+  const visibleItems = navItems.filter((item) => {
+    // If userOnly, only show to non-admin users
+    if (item.userOnly) return userRole !== 'admin'
+    // If adminOnly, only show to admin
+    if (item.adminOnly) return userRole === 'admin'
+    // Otherwise show to everyone
+    return true
+  })
 
   // Split items for left and right of center button
   const leftItems = visibleItems.slice(0, 2)
